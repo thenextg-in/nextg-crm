@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NextG CRM</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0b0b14;--bg2:#111120;--bg3:#1a1a2e;--bg4:#22223a;--bdr:rgba(255,255,255,.08);--acc:#6366f1;--grn:#10b981;--red:#ef4444;--amb:#f59e0b;--cyn:#06b6d4;--pur:#a78bfa;--t:#f0f0ff;--t2:#8888bb;--t3:#44446a}
+body{font-family:-apple-system,"Segoe UI",sans-serif;font-size:13px;background:var(--bg);color:var(--t);height:100vh;overflow:hidden}
+#LOCK{position:fixed;inset:0;background:var(--bg);z-index:9000;display:flex;align-items:center;justify-content:center}
+.lcard{background:var(--bg2);border:1px solid var(--bdr);border-radius:20px;padding:28px 22px;width:300px;max-width:94vw}
+.lbrand{font-size:22px;font-weight:900;color:var(--acc);text-align:center;letter-spacing:-1px;margin-bottom:2px}
+.lsub{font-size:9px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:1px;margin-bottom:18px}
+.llbl{font-size:9px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+.scards{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;max-height:160px;overflow-y:auto}
+.scard{width:100%;background:var(--bg3);border:2px solid var(--bdr);border-radius:9px;padding:8px 11px;cursor:pointer;display:flex;align-items:center;gap:9px;color:var(--t);transition:.12s;text-align:left;font-family:inherit}
+.scard:hover,.scard.sel{border-color:var(--acc);background:var(--bg4)}
+.sav{width:30px;height:30px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0}
+.snm{font-size:12px;font-weight:600}.srl{font-size:10px;color:var(--t3)}
+.ldots{display:flex;justify-content:center;gap:10px;margin:10px 0}
+.ldot{width:12px;height:12px;border-radius:50%;border:2px solid var(--bdr);transition:.12s}
+.ldot.on{background:var(--acc);border-color:var(--acc)}
+.npad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px}
+.nk{background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:12px;font-size:18px;font-weight:600;cursor:pointer;color:var(--t);font-family:inherit;transition:.1s}
+.nk:active{transform:scale(.93);background:var(--bg4)}
+.perr{min-height:16px;font-size:11px;color:var(--red);text-align:center;font-weight:600;margin-top:4px}
+.lstat{font-size:11px;color:var(--t3);text-align:center;margin-top:8px;min-height:18px;font-weight:500;letter-spacing:0.01em}
+#APP{display:none;flex-direction:column;height:100vh}
+.topbar{height:46px;background:var(--bg2);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 12px;gap:6px;flex-shrink:0}
+.tbrand{font-size:13px;font-weight:900;color:var(--acc);letter-spacing:-.5px}
+.tuser{font-size:10px;color:var(--t2);margin-left:2px}.tbr{margin-left:auto;display:flex;align-items:center;gap:5px}
+.tb{background:var(--bg3);border:1px solid var(--bdr);color:var(--t2);font-size:10px;padding:4px 9px;border-radius:6px;cursor:pointer;font-family:inherit;transition:.1s}
+.tb:hover{background:var(--bg4);color:var(--t)}.tb.acc{background:var(--acc);border-color:var(--acc);color:#fff}
+.body{display:flex;flex:1;overflow:hidden}
+#SB{width:178px;background:var(--bg2);border-right:1px solid var(--bdr);flex-shrink:0;overflow-y:auto;padding:4px}
+.ni{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:11px;font-weight:500;color:var(--t2);border:none;background:none;width:100%;text-align:left;font-family:inherit;margin-bottom:1px;transition:.1s;border-left:2px solid transparent}
+.ni:hover{background:var(--bg3);color:var(--t)}.ni.on{background:rgba(99,102,241,.1);color:var(--acc);font-weight:700;border-left-color:var(--acc)}
+.nsep{height:1px;background:var(--bdr);margin:4px 0}
+.nbadge{margin-left:auto;background:var(--red);color:#fff;font-size:8px;font-weight:700;padding:1px 5px;border-radius:8px;min-width:16px;text-align:center}
+#CONT{flex:1;overflow-y:auto;padding:14px}.pg{display:none}.pg.on{display:block}
+.card{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:13px;margin-bottom:11px}
+.ch{font-size:12px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:11px}
+.kpi{background:var(--bg2);border:1px solid var(--bdr);border-radius:9px;padding:11px}
+.kv{font-size:20px;font-weight:800;font-family:monospace;line-height:1}.kl{font-size:9px;color:var(--t2);margin-top:2px;text-transform:uppercase}
+.tw{overflow-x:auto;border:1px solid var(--bdr);border-radius:8px}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{background:var(--bg3);color:var(--t2);font-weight:700;padding:7px 9px;text-align:left;font-size:9px;text-transform:uppercase;white-space:nowrap;border-bottom:1px solid var(--bdr)}
+td{padding:7px 9px;border-top:1px solid var(--bdr);vertical-align:middle}
+.sp{display:inline-flex;padding:2px 7px;border-radius:10px;font-size:9px;font-weight:700;white-space:nowrap}
+.s0{background:#052b1a;color:#10b981}.s1{background:#05122b;color:#60a5fa}.s2{background:#2b1f05;color:#f59e0b}.s3{background:#15052b;color:#a78bfa}.s4{background:#05252b;color:#06b6d4}.s5{background:#1a1a05;color:#fde68a}.s6{background:#2b0510;color:#ef4444}.s7{background:#2b0520;color:#f9a8d4}
+.py{display:inline-flex;padding:2px 7px;border-radius:8px;font-size:9px;font-weight:700}
+.pp{background:#052b1a;color:#10b981}.pt{background:#2b1f05;color:#f59e0b}.pn{background:#2b0510;color:#ef4444}
+.td2c{background:#052b1a;color:#10b981;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700}
+.tb2b{background:#05122b;color:#60a5fa;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700}
+.fi{background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:7px 9px;font-size:12px;color:var(--t);font-family:inherit;outline:none;width:100%;transition:.12s}
+.fi:focus{border-color:var(--acc)}textarea.fi{resize:vertical;min-height:55px}
+.fl{font-size:9px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;display:block}
+.rq{color:#f9a8d4}.g2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:.12s;white-space:nowrap}
+.btn:active{transform:scale(.97)}.bp{background:var(--acc);color:#fff}.bg{background:var(--grn);color:#000}.bo{background:transparent;color:var(--t2);border:1px solid var(--bdr)}.br{background:transparent;color:var(--red);border:1px solid rgba(239,68,68,.3)}.sm{padding:3px 8px;font-size:10px}
+.tabs{display:flex;gap:2px;background:var(--bg3);padding:3px;border-radius:8px;flex-wrap:wrap;margin-bottom:11px}
+.tab{padding:4px 9px;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer;color:var(--t2);border:none;background:none;font-family:inherit;transition:.1s}.tab.on{background:var(--bg2);color:var(--t)}
+.steps{display:flex;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:3px}
+.stw{display:flex;flex-direction:column;align-items:center;gap:3px}
+.stc{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;border:2px solid var(--bdr);color:var(--t3);background:var(--bg3);transition:.15s}
+.stc.done{background:var(--grn);border-color:var(--grn);color:#000}.stc.act{background:var(--acc);border-color:var(--acc);color:#fff}
+.stl{font-size:8px;color:var(--t3)}.stln{flex:1;height:2px;background:var(--bdr);margin:0 3px;margin-bottom:12px;min-width:14px}.stln.done{background:var(--grn)}
+.jnum{font-family:monospace;font-size:13px;font-weight:700;color:var(--acc);padding:6px 10px;background:rgba(99,102,241,.08);border-radius:7px;border:1px solid rgba(99,102,241,.2);display:inline-block}
+.vsw{position:relative}.vsr{position:absolute;top:100%;left:0;right:0;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;z-index:200;max-height:180px;overflow-y:auto;display:none;margin-top:2px;box-shadow:0 8px 24px rgba(0,0,0,.6)}.vsr.open{display:block}
+.vsi{padding:8px 10px;cursor:pointer;border-bottom:1px solid var(--bdr)}.vsi:hover{background:var(--bg4)}
+#MOD{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:500;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:14px}
+#MOD.on{display:flex}.mbox{background:var(--bg2);border:1px solid var(--bdr);border-radius:16px;width:100%;max-width:680px;padding:18px;margin:auto}
+.mhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}.mhd h3{font-size:13px;font-weight:700}
+.mx{background:none;border:none;color:var(--t2);font-size:22px;cursor:pointer;line-height:1;font-family:inherit}
+#TOAST{position:fixed;bottom:14px;right:14px;z-index:600;display:flex;flex-direction:column;gap:5px;pointer-events:none}
+.tst{padding:8px 13px;border-radius:8px;font-size:11px;font-weight:600;opacity:0;transform:translateY(5px);transition:.2s;border:1px solid;max-width:260px}.tst.show{opacity:1;transform:none}
+.tok{background:#052b1a;color:#10b981;border-color:rgba(16,185,129,.3)}.ter{background:#2b0510;color:#ef4444;border-color:rgba(239,68,68,.3)}.tif{background:var(--bg4);color:var(--t);border-color:var(--bdr)}
+.mono{font-family:monospace;color:var(--acc)}.tip{background:rgba(99,102,241,.06);border-left:3px solid var(--acc);padding:8px 10px;border-radius:0 6px 6px 0;font-size:10px;color:var(--t2);margin:5px 0;line-height:1.5}.tip.g{background:rgba(16,185,129,.06);border-left-color:var(--grn);color:var(--grn)}
+.empty{text-align:center;padding:36px;color:var(--t3)}.pindots{display:flex;justify-content:center;gap:10px;margin:10px 0}
+.pdot{width:12px;height:12px;border-radius:50%;border:2px solid var(--bdr);transition:.12s}.pdot.on{background:var(--acc);border-color:var(--acc)}
+.ppad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.pk{background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:10px;font-size:16px;font-weight:600;cursor:pointer;color:var(--t);font-family:inherit;text-align:center;transition:.1s}.pk:active{transform:scale(.93)}
+.rcp{background:#fff;color:#111;padding:16px;font-family:Arial,sans-serif;font-size:10px;line-height:1.5;border-radius:6px}
+@media(max-width:640px){#SB{display:none}.g4{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div id="LOCK">
+  <div class="lcard">
+    <div class="lbrand">NextG CRM</div>
+    <div class="lsub">The Next G &middot; Service Management</div>
+    <div class="llbl">Select Your Name</div>
+    <div class="scards" id="SCARDS"></div>
+    <div class="llbl">Enter PIN</div>
+    <div class="ldots"><div class="ldot" id="d0"></div><div class="ldot" id="d1"></div><div class="ldot" id="d2"></div><div class="ldot" id="d3"></div></div>
+    <div class="npad" id="NPAD">
+      <button class="nk" data-n="1">1</button><button class="nk" data-n="2">2</button><button class="nk" data-n="3">3</button>
+      <button class="nk" data-n="4">4</button><button class="nk" data-n="5">5</button><button class="nk" data-n="6">6</button>
+      <button class="nk" data-n="7">7</button><button class="nk" data-n="8">8</button><button class="nk" data-n="9">9</button>
+      <button class="nk" data-n="clr" style="font-size:11px">CLR</button>
+      <button class="nk" data-n="0">0</button>
+      <button class="nk" data-n="del" style="font-size:11px">DEL</button>
+    </div>
+    <div class="perr" id="PERR"></div>
+    <div class="lstat" id="LSTAT">Loading...</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="APP">
+  <div class="topbar">
+    <span class="tbrand">NextG CRM</span>
+    <span id="BRTAG" style="font-size:10px;color:var(--t3)">Main</span>
+    <span class="tuser" id="TUSR"></span>
+    <div class="tbr">
+      <button class="tb" id="btnLock">Lock</button>
+      <button class="tb" id="btnSync" title="Sync now">&#8635; Sync</button><div id="SYNCDOT" title="Auto-synced" style="width:7px;height:7px;border-radius:50%;background:var(--grn);opacity:0;transition:opacity 0.5s;flex-shrink:0;margin-left:-2px"></div>
+      <button class="tb" id="btnScan">Find Job</button>
+      <button class="tb acc" id="btnNew">+ New Job</button>
+    </div>
+  </div>
+  <div class="body">
+    <div id="SB">
+      <button class="ni on" data-pg="dash">Dashboard</button>
+      <button class="ni" data-pg="newjob">+ New Job</button>
+      <button class="ni" data-pg="jobs">All Jobs <span class="nbadge" id="JBG">0</span></button>
+      <button class="ni" data-pg="search">Search</button>
+      <div class="nsep"></div>
+      <button class="ni" data-pg="eng">Engineer View</button>
+      <button class="ni" data-pg="est">Estimation</button>
+      <button class="ni" data-pg="pay">Payments</button>
+      <button class="ni" data-pg="inv">Invoices</button>
+      <button class="ni" data-pg="parts">Inventory</button>
+      <button class="ni" data-pg="warr">Warranty</button>
+      <button class="ni" data-pg="comms">Comms Log</button>
+      <button class="ni" data-pg="act">Activity Log</button>
+      <div class="nsep"></div>
+      <button class="ni" data-pg="vendors">B2B Vendors</button>
+      <button class="ni" data-pg="bin">Recycle Bin <span class="nbadge" id="BINB" style="background:var(--t3)">0</span></button>
+      <button class="ni" data-pg="settings">Settings</button>
+    </div>
+    <div id="CONT">
+      <div class="pg on" id="pg-dash">
+        <div class="g4">
+          <div class="kpi"><div class="kv" id="K1" style="color:var(--acc)">0</div><div class="kl">Total Jobs</div></div>
+          <div class="kpi"><div class="kv" id="K2" style="color:var(--amb)">0</div><div class="kl">Active</div></div>
+          <div class="kpi"><div class="kv" id="K3" style="color:var(--grn)">0</div><div class="kl">Today</div></div>
+          <div class="kpi"><div class="kv" id="K4" style="color:var(--cyn)">&#8377;0</div><div class="kl">Month Rev</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:11px">
+          <div class="card"><div class="ch">Recent Jobs <button class="btn bp sm" id="dashNew">+ New</button></div>
+            <div class="tw"><table><thead><tr><th>Job#</th><th>Vendor#</th><th>Customer</th><th>Device</th><th>Status</th><th>Pay</th><th></th></tr></thead><tbody id="DBJ"></tbody></table></div></div>
+          <div>
+            <div class="card"><div class="ch">Activity</div><div id="DBA" style="max-height:140px;overflow-y:auto;font-size:11px"></div></div>
+            <div class="card"><div class="ch">Pending Payments</div><div id="DBP" style="font-size:11px"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="pg" id="pg-newjob"><div class="steps" id="STEPS"></div><div id="NJW"></div></div>
+      <div class="pg" id="pg-jobs">
+        <div style="display:flex;gap:7px;margin-bottom:11px;flex-wrap:wrap">
+          <input class="fi" id="JQ" placeholder="Search job#, vendor#, B2B ref, serial, phone, name..." style="flex:1;min-width:150px">
+          <select class="fi" id="JST" style="width:auto"><option value="">All Status</option><option>Received</option><option>Under Diagnosis</option><option>Waiting Approval</option><option>Repair In Progress</option><option>Completed</option><option>Delivered</option><option>Cancelled</option><option>Reopened</option></select>
+          <select class="fi" id="JTP" style="width:auto"><option value="">D2C+B2B</option><option value="D2C">D2C</option><option value="B2B">B2B</option></select>
+          <button class="btn bo sm" id="btnCSV">Export CSV</button>
+        </div>
+        <div class="tw"><table><thead><tr><th>Our Job#</th><th>Vendor#</th><th>B2B Ref</th><th>Type</th><th>Customer</th><th>Device</th><th>Engineer</th><th>Status</th><th>Payment</th><th>Actions</th></tr></thead><tbody id="JTB"></tbody></table></div>
+        <div class="empty" id="JEM" style="display:none">No jobs match filters</div>
+      </div>
+      <div class="pg" id="pg-search">
+        <div class="card"><div class="g2">
+          <div><label class="fl">Search By</label><select class="fi" id="SBY"><option value="all">All Fields</option><option value="jn">Our Job#</option><option value="vjn">Vendor Job#</option><option value="b2bref">B2B Ref</option><option value="serial">Serial</option><option value="phone">Phone</option><option value="name">Customer</option><option value="company">Company</option></select></div>
+          <div><label class="fl">Search Term</label><input class="fi" id="SBQ" placeholder="Type to search..."></div>
+        </div></div>
+        <div id="SRW" style="display:none"><div class="tw"><table><thead><tr><th>Job#</th><th>Vendor#</th><th>Type</th><th>Customer</th><th>Device</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody id="SRB"></tbody></table></div></div>
+        <div class="empty" id="SRE">Enter a search term above</div>
+      </div>
+      <div class="pg" id="pg-eng">
+        <div style="display:flex;gap:7px;margin-bottom:11px">
+          <select class="fi" id="EFE" style="width:auto"><option value="">All Engineers</option></select>
+          <select class="fi" id="EFS" style="width:auto"><option value="">All Active</option><option>Received</option><option>Under Diagnosis</option><option>Waiting Approval</option><option>Repair In Progress</option></select>
+        </div>
+        <div class="tw"><table><thead><tr><th>Job#</th><th>Vendor#</th><th>Customer</th><th>Device</th><th>Problem</th><th>Status</th><th>Priority</th><th>TAT</th><th>Update</th></tr></thead><tbody id="ETB2"></tbody></table></div>
+      </div>
+      <div class="pg" id="pg-est">
+        <div class="tip" style="margin-bottom:11px">Add estimates after diagnosis. Parts + Labour auto-totals. Customer approval needed before repair starts.</div>
+        <div class="tw"><table><thead><tr><th>Job#</th><th>Customer</th><th>Device</th><th>Problem</th><th>Status</th><th>Estimate</th><th>Approval</th><th></th></tr></thead><tbody id="ESTB"></tbody></table></div>
+      </div>
+      <div class="pg" id="pg-pay">
+        <div class="g4" style="margin-bottom:11px">
+          <div class="kpi"><div class="kv" id="PK1" style="font-size:16px;color:var(--acc)">&#8377;0</div><div class="kl">Total Billed</div></div>
+          <div class="kpi"><div class="kv" id="PK2" style="font-size:16px;color:var(--grn)">&#8377;0</div><div class="kl">Received</div></div>
+          <div class="kpi"><div class="kv" id="PK3" style="font-size:16px;color:var(--red)">&#8377;0</div><div class="kl">Pending</div></div>
+          <div class="kpi"><div class="kv" id="PK4" style="font-size:16px;color:var(--amb)">&#8377;0</div><div class="kl">Balance</div></div>
+        </div>
+        <div class="tw"><table><thead><tr><th>Job#</th><th>Customer</th><th>Device</th><th>Total</th><th>Paid</th><th>Balance</th><th>Method</th><th>Status</th><th></th></tr></thead><tbody id="PB"></tbody></table></div>
+      </div>
+      <div class="pg" id="pg-inv">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn bp sm" id="btnGenInv">+ Generate Invoice</button></div>
+        <div class="tw"><table><thead><tr><th>Invoice#</th><th>Job#</th><th>Customer</th><th>Date</th><th>Base</th><th>GST</th><th>Total</th><th>Status</th><th></th></tr></thead><tbody id="IVB"></tbody></table></div>
+      </div>
+      <div class="pg" id="pg-parts">
+        <div style="display:flex;gap:7px;margin-bottom:10px"><input class="fi" id="PQ" placeholder="Search parts..." style="flex:1"><button class="btn bp sm" id="btnAddPart">+ Add Part</button></div>
+        <div class="tw"><table><thead><tr><th>Name</th><th>SKU</th><th>Category</th><th>Compatible</th><th>Stock</th><th>Min</th><th>Cost &#8377;</th><th>Sell &#8377;</th><th>Location</th><th>Status</th><th></th></tr></thead><tbody id="PTB"></tbody></table></div>
+      </div>
+      <div class="pg" id="pg-warr">
+        <div class="tw"><table><thead><tr><th>Job#</th><th>Customer</th><th>Device</th><th>Problem</th><th>Completed</th><th>Warranty Till</th><th>Status</th><th></th></tr></thead><tbody id="WRB"></tbody></table></div>
+      </div>
+      <div class="pg" id="pg-comms">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn bp sm" id="btnAddComm">+ Log Communication</button></div>
+        <div class="tw"><table><thead><tr><th>Date</th><th>Job#</th><th>Customer</th><th>Channel</th><th>Direction</th><th>Message</th><th>By</th></tr></thead><tbody id="CMB"></tbody></table></div>
+      </div>
+      <div class="pg" id="pg-act">
+        <div style="display:flex;gap:7px;margin-bottom:10px">
+          <select class="fi" id="AFU" style="width:auto"><option value="">All Staff</option></select>
+          <select class="fi" id="AFT" style="width:auto"><option value="">All Actions</option><option value="JOB_CREATED">Created</option><option value="JOB_EDITED">Edited</option><option value="STATUS_CHANGED">Status</option><option value="PAYMENT_UPDATED">Payment</option><option value="LOGIN">Login</option></select>
+        </div>
+        <div class="card" style="padding:0"><div id="ACL" style="padding:8px 14px;max-height:420px;overflow-y:auto"></div></div>
+      </div>
+      <div class="pg" id="pg-vendors">
+        <div style="display:flex;gap:7px;margin-bottom:10px"><input class="fi" id="VLQ" placeholder="Search vendors..." style="max-width:220px"><button class="btn bp sm" id="btnAddVen" style="margin-left:auto">+ Add Vendor</button></div>
+        <div id="VNG" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px"></div>
+        <div class="empty" id="VNE" style="display:none">No vendors yet</div>
+      </div>
+      <div class="pg" id="pg-bin">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
+          <div style="font-size:13px;font-weight:700">Recycle Bin</div>
+          <button class="btn br sm" id="btnEmptyBin">Empty Bin</button>
+        </div>
+        <div class="tw"><table><thead><tr><th>Job#</th><th>Vendor#</th><th>Type</th><th>Customer</th><th>Device</th><th>Status</th><th>Deleted By</th><th>Date</th><th>Actions</th></tr></thead><tbody id="RBB"></tbody></table></div>
+        <div class="empty" id="RBE" style="display:none">Recycle bin is empty</div>
+      </div>
+      <div class="pg" id="pg-settings">
+        <div class="tabs" id="STABS">
+          <button class="tab on" data-st="biz">Business</button>
+          <button class="tab" data-st="staff">Staff / PIN</button>
+          <button class="tab" data-st="db">Database</button>
+          <button class="tab" data-st="email">Email</button>
+          <button class="tab" data-st="data">Data</button>
+        </div>
+        <div id="SS-biz">
+          <div class="card"><div class="ch">Business Information</div>
+            <div class="g2"><div><label class="fl">Business Name</label><input class="fi" id="CBN" value="The Next G"></div><div><label class="fl">Phone</label><input class="fi" id="CBP"></div></div>
+            <div class="g2" style="margin-top:9px"><div><label class="fl">Email</label><input class="fi" id="CBE" type="email"></div><div><label class="fl">Address</label><input class="fi" id="CBA"></div></div>
+            <div class="g2" style="margin-top:9px"><div><label class="fl">GST Number</label><input class="fi" id="CGST"></div><div><label class="fl">Warranty Days</label><input class="fi" id="CWD" type="number" value="30"></div></div>
+            <div class="g2" style="margin-top:9px"><div><label class="fl">GST Rate %</label><input class="fi" id="CGR" type="number" value="18"></div><div><label class="fl">Invoice Prefix</label><input class="fi" id="CIP" value="INV"></div></div>
+          </div>
+          <div class="card"><div class="ch">Terms &amp; Conditions (on receipt)</div>
+            <textarea class="fi" id="CTERMS" rows="4">1. Device at customer risk.
+2. Not responsible for data loss.
+3. Uncollected after 30 days.
+4. Warranty as agreed.
+5. Estimate after diagnosis only.</textarea>
+          </div>
+        </div>
+        <div id="SS-staff" style="display:none">
+          <div class="card"><div class="ch">Staff Members &amp; PIN Management</div>
+            <div id="STLIST" style="margin-bottom:12px"></div>
+            <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:flex-end">
+              <div style="flex:1;min-width:100px"><label class="fl">Name</label><input class="fi" id="STNM" placeholder="Staff name"></div>
+              <div><label class="fl">Role</label><select class="fi" id="STRL" style="width:auto"><option>Admin</option><option>Engineer</option><option>Reception</option></select></div>
+              <div><label class="fl">Spec</label><select class="fi" id="STSP" style="width:auto"><option>All Devices</option><option>Mobile</option><option>Laptop</option><option>LED/Monitor</option><option>Printer</option></select></div>
+              <button class="btn bo sm" id="btnAddStaff">+ Add</button>
+            </div>
+            <div class="tip" style="margin-top:8px">After adding staff, click Change PIN to set their 4-digit PIN. PINs are never shown on screen.</div>
+          </div>
+        </div>
+        <div id="SS-db" style="display:none">
+          <div class="card"><div class="ch">Supabase Cloud Database</div>
+            <div class="tip g" style="margin-bottom:10px">Cloud sync across all devices. Free forever for your usage volume.</div>
+            <div class="g2"><div><label class="fl">Supabase Project URL</label><input class="fi" id="CSBU" placeholder="https://xxxxx.supabase.co"></div><div><label class="fl">Supabase Anon Key</label><input class="fi" id="CSBK" type="password" placeholder="eyJ..."></div></div>
+            <div style="display:flex;gap:7px;margin-top:8px;flex-wrap:wrap">
+              <button class="btn bo sm" id="btnTestDB">Test Connection</button>
+              <button class="btn bp sm" id="btnSaveDB">Save &amp; Connect</button>
+              <button class="btn bo sm" id="btnSQL">Show Setup SQL</button>
+              <span id="DBR" style="font-size:11px;align-self:center"></span>
+            </div>
+          </div>
+        </div>
+        <div id="SS-email" style="display:none">
+          <div class="card"><div class="ch">Auto Email (EmailJS)</div>
+            <div class="tip" style="margin-bottom:9px">Free 200 emails/month. Sign up at emailjs.com &rarr; add Gmail &rarr; create template &rarr; paste IDs here.</div>
+            <div class="g2"><div><label class="fl">Public Key</label><input class="fi" id="CEJK"></div><div><label class="fl">Service ID</label><input class="fi" id="CEJS"></div></div>
+            <div class="g2" style="margin-top:9px"><div><label class="fl">Template: Job Received</label><input class="fi" id="CEJT1"></div><div><label class="fl">Template: Job Ready</label><input class="fi" id="CEJT2"></div></div>
+          </div>
+        </div>
+        <div id="SS-data" style="display:none">
+          <div class="card"><div class="ch">Data Management</div>
+            <div style="display:flex;gap:7px;flex-wrap:wrap">
+              <button class="btn bo sm" id="btnBkp">&#8681; Backup JSON</button>
+              <button class="btn bo sm" id="btnRst">&#8679; Restore JSON</button>
+              <button class="btn bo sm" id="btnXCSV">Export CSV</button>
+              <button class="btn bo sm" id="btnForceSync">Force Sync</button>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:10px"><button class="btn bg" id="btnSaveSet">&#10003; Save Settings</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="MOD"><div class="mbox"><div class="mhd"><h3 id="MTIT"></h3><button class="mx" id="btnMX">&#10005;</button></div><div id="MBOD"></div></div></div>
+<div id="TOAST"></div>
+<script>
+// NextG CRM — Commercial Grade
+// All event listeners use addEventListener — NO onclick in HTML ever
+// Admin default PIN: 8543 — change after first login
+
+var DB={jobs:[],deletedJobs:[],vendors:[],parts:[],invoices:[],comms:[],activityLog:[],
+  branches:[{id:'main',name:'Main Branch',code:'MB'}],
+  staff:[{id:'admin0',name:'Admin',role:'Admin',spec:'All Devices',pin:'8543'}],
+  settings:{bn:'The Next G',bp:'',be:'',ba:'',gst:'',wd:30,gstRate:18,invPfx:'INV',
+    sbUrl:'https://mlytswrgbksixuapqsrc.supabase.co',sbKey:'sb_publishable_2TK0fDOy52Br2Nt4AbO1KA_oxFy386N',ejKey:'',ejSvc:'',ejTpl1:'',ejTpl2:'',
+    terms:'1. Device at customer risk.\n2. Not responsible for data loss.\n3. Uncollected after 30 days.\n4. Warranty as agreed.\n5. Estimate after diagnosis only.'}};
+
+var CU=null,CB='main',SEL=null,LPIN='',SBURL='',SBKEY='';
+var NJS=1,NJF={};
+var CPID=null,CPSTEP='',CPFIRST='',CPENTRY='';
+var SL=['Received','Under Diagnosis','Waiting Approval','Repair In Progress','Completed','Delivered','Cancelled','Reopened'];
+
+function save(){try{var t=JSON.parse(JSON.stringify(DB));t.staff=t.staff.map(function(s){var c=Object.assign({},s);delete c.pin;return c;});localStorage.setItem('ng9',JSON.stringify(t));}catch(e){}}
+function load(){try{var r=localStorage.getItem('ng9');if(!r)return;var p=JSON.parse(r);if(p.jobs)DB.jobs=p.jobs;if(p.deletedJobs)DB.deletedJobs=p.deletedJobs;if(p.vendors)DB.vendors=p.vendors;if(p.parts)DB.parts=p.parts;if(p.invoices)DB.invoices=p.invoices;if(p.comms)DB.comms=p.comms;if(p.activityLog)DB.activityLog=p.activityLog;if(p.branches&&p.branches.length)DB.branches=p.branches;if(p.settings)DB.settings=Object.assign({},DB.settings,p.settings);if(p.staff&&p.staff.length){DB.staff=p.staff;}}catch(e){}}
+
+async function sbReq(method,table,body,query){if(!SBURL||!SBKEY)return null;try{var r=await fetch(SBURL+'/rest/v1/'+table+(query||''),{method:method,headers:{'Content-Type':'application/json','apikey':SBKEY,'Authorization':'Bearer '+SBKEY,'Prefer':method==='POST'?'return=representation':'return=minimal'},body:body?JSON.stringify(body):undefined});var txt=await r.text();return txt?JSON.parse(txt):true;}catch(e){return null;}}
+async function sbGet(t,q){return sbReq('GET',t,null,q);}
+async function sbUp(t,row){if(!SBURL||!SBKEY)return;try{await fetch(SBURL+'/rest/v1/'+t,{method:'POST',headers:{'Content-Type':'application/json','apikey':SBKEY,'Authorization':'Bearer '+SBKEY,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(row)});}catch(e){}}
+async function sbDel(t,id){return sbReq('DELETE',t,null,'?id=eq.'+id);}
+
+async function loadStaff(){
+  var rows=await sbGet('staff');
+  if(!rows||!rows.length){
+    // Supabase returned nothing - keep hardcoded admin as fallback
+    return;
+  }
+  // Cloud is the source of truth - completely replace staff from Supabase
+  var cloudStaff=rows.map(function(r){return r.data||{};}).filter(function(d){return d.id&&d.pin;});
+  if(cloudStaff.length){
+    DB.staff=cloudStaff;
+  } else {
+    // Supabase has rows but none have PINs yet - merge carefully
+    rows.forEach(function(r){
+      var d=r.data||{};
+      if(!d.id)return;
+      var i=DB.staff.findIndex(function(s){return s.id===d.id;});
+      if(i>=0)DB.staff[i]=Object.assign({},DB.staff[i],d);
+      else DB.staff.push(d);
+    });
+  }
+}
+
+async function syncAll(silent){if(!SBURL){if(!silent)toast('Set Supabase in Settings \u2192 Database','if');return;}try{var rs=await Promise.all([sbGet('jobs','?order=created_at.desc&limit=2000'),sbGet('activity_log','?order=created_at.desc&limit=500'),sbGet('vendors'),sbGet('parts'),sbGet('invoices','?order=created_at.desc'),sbGet('comms','?order=created_at.desc&limit=500'),sbGet('staff')]);if(rs[0])DB.jobs=rs[0].map(function(r){return r.data;});if(rs[1])DB.activityLog=rs[1].map(function(r){return r.data;});if(rs[2])DB.vendors=rs[2].map(function(r){return r.data;});if(rs[3])DB.parts=rs[3].map(function(r){return r.data;});if(rs[4])DB.invoices=rs[4].map(function(r){return r.data;});if(rs[5])DB.comms=rs[5].map(function(r){return r.data;});if(rs[6]){var cs=rs[6].map(function(r){return r.data||{};}).filter(function(d){return d.id&&d.pin;});if(cs.length)DB.staff=cs;}save();rAll();buildLock();showSyncDot();if(!silent)toast('Synced','ok');}catch(e){if(!silent)toast('Sync error: '+e.message,'er');}}
+async function pushJob(j){save();if(SBURL)await sbUp('jobs',{id:j.id,data:j,created_at:j.ts,updated_at:new Date().toISOString()});}
+async function pushStaff(s){save();if(SBURL)await sbUp('staff',{id:s.id,data:s});}
+
+var _syncDotTimer=null;
+function showSyncDot(){var d=document.getElementById('SYNCDOT');if(!d)return;d.style.opacity='1';clearTimeout(_syncDotTimer);_syncDotTimer=setTimeout(function(){d.style.opacity='0';},1800);}
+
+var _autoSyncInterval=null;
+function startAutoSync(){if(_autoSyncInterval)clearInterval(_autoSyncInterval);_autoSyncInterval=setInterval(function(){if(CU&&SBURL)syncAll(true);},30000);}
+function stopAutoSync(){if(_autoSyncInterval){clearInterval(_autoSyncInterval);_autoSyncInterval=null;}}
+
+function buildLock(){var g=document.getElementById('SCARDS');if(!g)return;g.innerHTML='';DB.staff.forEach(function(s){var b=document.createElement('button');b.className='scard'+(SEL===s.id?' sel':'');b.id='sc-'+s.id;b.innerHTML='<div class="sav">'+s.name[0].toUpperCase()+'</div><div><div class="snm">'+esc(s.name)+'</div><div class="srl">'+s.role+' \u00b7 '+s.spec+'</div></div>';b.addEventListener('click',(function(id){return function(){pickStaff(id);};})(s.id));g.appendChild(b);});if(DB.staff.length===1)pickStaff(DB.staff[0].id);}
+function pickStaff(id){SEL=id;LPIN='';updDots();var e=document.getElementById('PERR');if(e)e.textContent='';document.querySelectorAll('.scard').forEach(function(b){b.classList.remove('sel');});var b=document.getElementById('sc-'+id);if(b)b.classList.add('sel');}
+function updDots(){for(var i=0;i<4;i++){var d=document.getElementById('d'+i);if(d)d.classList.toggle('on',i<LPIN.length);}}
+function lkp(n){if(LPIN.length>=4)return;LPIN+=String(n);updDots();if(LPIN.length===4)setTimeout(tryLogin,150);}
+
+function tryLogin(){var err=document.getElementById('PERR');if(!SEL){err.textContent='Please select your name first';LPIN='';updDots();return;}var s=DB.staff.find(function(x){return x.id===SEL;});if(!s){err.textContent='Staff not found \u2014 try Sync';LPIN='';updDots();return;}var correct=String(s.pin||'').trim();var entered=String(LPIN).trim();if(!correct){err.textContent='No PIN set \u2014 contact Admin';LPIN='';updDots();return;}if(correct!==entered){err.textContent='Incorrect PIN. Try again.';LPIN='';updDots();return;}doLogin(s);}
+
+function doLogin(s){CU=s;document.getElementById('LOCK').style.display='none';document.getElementById('APP').style.display='flex';document.getElementById('TUSR').textContent=s.name+' ('+s.role+')';document.getElementById('BRTAG').textContent=(DB.branches[0]||{name:'Main'}).name;logAct('LOGIN',null,s.name+' logged in',null);rAll();if(SBURL){syncAll();startAutoSync();}}
+function lockApp(){if(!confirm('Lock the app?'))return;stopAutoSync();CU=null;SEL=null;LPIN='';document.getElementById('LOCK').style.display='flex';document.getElementById('APP').style.display='none';buildLock();updDots();var e=document.getElementById('PERR');if(e)e.textContent='';}
+
+function nav(id){document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on');});var pg=document.getElementById('pg-'+id);if(pg)pg.classList.add('on');document.querySelectorAll('#SB .ni[data-pg="'+id+'"]').forEach(function(n){n.classList.add('on');});var fn={dash:rDash,jobs:rJobs,eng:rEng,est:rEst,pay:rPay,inv:rInv,parts:rParts,warr:rWarr,comms:rComms,act:rAct,vendors:rVendors,bin:rBin,settings:lCfg,newjob:initNJ};if(fn[id])fn[id]();}
+
+function gv(id){var e=document.getElementById(id);return e?e.value:'';}
+function sv(id,v){var e=document.getElementById(id);if(e)e.value=v;}
+function st(id,v){var e=document.getElementById(id);if(e)e.innerHTML=v;}
+function p2(n){return String(n).padStart(2,'0');}
+function p3(n){return String(n).padStart(3,'0');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function spill(s){var m={Received:'s0','Under Diagnosis':'s1','Waiting Approval':'s2','Repair In Progress':'s3',Completed:'s4',Delivered:'s5',Cancelled:'s6',Reopened:'s7'};return '<span class="sp '+(m[s]||'s0')+'">'+s+'</span>';}
+function pbdg(p){return '<span class="py '+(p==='Paid'?'pp':p==='Partial'?'pt':'pn')+'">'+(p||'Pending')+'</span>';}
+function updBadge(){var j=document.getElementById('JBG');if(j)j.textContent=DB.jobs.filter(function(x){return['Delivered','Cancelled'].indexOf(x.status)<0;}).length;var b=document.getElementById('BINB');if(b){var n=(DB.deletedJobs||[]).length;b.textContent=n;b.style.background=n?'var(--red)':'var(--t3)';}}
+function toast(msg,type){var t=document.createElement('div');t.className='tst t'+(type==='ok'?'ok':type==='er'?'er':'if');t.textContent=msg;document.getElementById('TOAST').appendChild(t);requestAnimationFrame(function(){requestAnimationFrame(function(){t.classList.add('show');});});setTimeout(function(){t.classList.remove('show');setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},200);},3200);}
+function logAct(type,jid,title,chg){var a={id:Date.now().toString()+Math.random().toString(36).slice(2,4),type:type,jid:jid,title:title,chg:chg,user:CU?CU.name:'System',ts:new Date().toISOString()};DB.activityLog.unshift(a);if(DB.activityLog.length>2000)DB.activityLog=DB.activityLog.slice(0,2000);save();if(SBURL)sbUp('activity_log',{id:a.id,data:a,created_at:a.ts});}
+function oMod(title,body){document.getElementById('MTIT').textContent=title;document.getElementById('MBOD').innerHTML=body;document.getElementById('MOD').classList.add('on');}
+function cMod(){document.getElementById('MOD').classList.remove('on');}
+function genJN(type,code){var now=new Date(),d=now.getFullYear()+p2(now.getMonth()+1)+p2(now.getDate());var br=DB.branches[0]||{code:'MB'};var same=DB.jobs.filter(function(j){return new Date(j.ts).toDateString()===now.toDateString()&&j.ctype===type;});return type==='D2C'?'D2C-'+br.code+'-'+d+'-'+p3(same.length+1):'B2B-'+(code||'VEN').toUpperCase().slice(0,5)+'-'+d+'-'+p3(same.length+1);}
+function eBtn(id,fn){var el=document.getElementById(id);if(el)el.addEventListener('click',fn);}
+function on(el,ev,fn){if(el)el.addEventListener(ev,fn);}
+
+function njReset(){NJS=1;NJF={ctype:'',name:'',phone:'',email:'',addr:'',company:'',code:'',vjn:'',b2bref:'',contact:'',b2bph:'',b2bem:'',sla:'48',dtype:'',brand:'',model:'',serial:'',imei:'',warr:'Unknown',ram:'',stor:'',cpu:'',prob:'',voc:'',cond:'',cosm:'',accs:'',eng:'',pri:'Normal',note:''};}
+njReset();
+function initNJ(){rSteps();renderNJS();}
+function rSteps(){var n=['Customer','Device','Problem','Review'];st('STEPS',n.map(function(nm,i){var num=i+1,cl=num<NJS?'done':num===NJS?'act':'';return '<div class="stw"><div class="stc '+cl+'">'+(num<NJS?'&#10003;':num)+'</div><div class="stl">'+nm+'</div></div>'+(i<3?'<div class="stln '+(num<NJS?'done':'')+'"></div>':'');}).join(''));}
+
+function renderNJS(){
+  var f=NJF,w=document.getElementById('NJW');
+  if(NJS===1){
+    w.innerHTML='<div class="card"><div class="ch">Customer Details</div>'
+      +'<div class="g2" style="margin-bottom:9px"><div><label class="fl">Type <span class="rq">*</span></label><select class="fi" id="FCT"><option value="">-- Select --</option><option value="D2C">D2C - Direct Customer (Walk-in)</option><option value="B2B">B2B - Business / Vendor</option></select></div>'
+      +'<div><label class="fl">Job Number</label><div class="jnum" id="FJN">'+(f.ctype?genJN(f.ctype,f.code):'--')+'</div></div></div>'
+      +'<div id="D2CF" style="display:'+(f.ctype==='D2C'?'block':'none')+'">'
+      +'<div class="g2" style="margin-bottom:9px"><div><label class="fl">Customer Name <span class="rq">*</span></label><input class="fi" id="FNM" value="'+esc(f.name)+'" placeholder="Full name"></div><div><label class="fl">Phone <span class="rq">*</span></label><input class="fi" id="FPH" value="'+esc(f.phone)+'" placeholder="+91 XXXXX XXXXX"></div></div>'
+      +'<div class="g2"><div><label class="fl">Email</label><input class="fi" id="FEM" type="email" value="'+esc(f.email)+'"></div><div><label class="fl">Address</label><input class="fi" id="FAD" value="'+esc(f.addr)+'"></div></div></div>'
+      +'<div id="B2BF" style="display:'+(f.ctype==='B2B'?'block':'none')+'">'
+      +'<div style="margin-bottom:9px"><label class="fl">Search Vendor</label><div class="vsw"><input class="fi" id="VSRCH" placeholder="Type vendor name..." autocomplete="off"><div class="vsr" id="VSR"></div></div></div>'
+      +'<div class="g2" style="margin-bottom:9px"><div><label class="fl">Company <span class="rq">*</span></label><input class="fi" id="FCO" value="'+esc(f.company)+'"></div><div><label class="fl">Vendor Code <span class="rq">*</span></label><input class="fi" id="FCD" value="'+esc(f.code)+'" maxlength="6"></div></div>'
+      +'<div class="g2" style="margin-bottom:9px"><div><label class="fl">Vendor Job# <span class="rq">*</span></label><input class="fi" id="FVJ" value="'+esc(f.vjn)+'"></div><div><label class="fl">B2B Ref# <span class="rq">*</span></label><input class="fi" id="FB2" value="'+esc(f.b2bref)+'"></div></div>'
+      +'<div class="g2" style="margin-bottom:9px"><div><label class="fl">Contact Person <span class="rq">*</span></label><input class="fi" id="FCN" value="'+esc(f.contact)+'"></div><div><label class="fl">Contact Phone <span class="rq">*</span></label><input class="fi" id="FBP" value="'+esc(f.b2bph)+'"></div></div>'
+      +'<div class="g2"><div><label class="fl">Vendor Email</label><input class="fi" id="FBE" type="email" value="'+esc(f.b2bem)+'"></div><div><label class="fl">SLA Hours</label><input class="fi" id="FSL" type="number" value="'+(f.sla||48)+'"></div></div></div>'
+      +'</div><div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn bp" id="njN1">Next: Device &#8594;</button></div>';
+    if(f.ctype)sv('FCT',f.ctype);
+    on(document.getElementById('FCT'),'change',function(){NJF.ctype=this.value;var d2=document.getElementById('D2CF'),b2=document.getElementById('B2BF');if(d2)d2.style.display=this.value==='D2C'?'block':'none';if(b2)b2.style.display=this.value==='B2B'?'block':'none';var jn=document.getElementById('FJN');if(jn&&NJF.ctype)jn.textContent=genJN(NJF.ctype,gv('FCD'));});
+    on(document.getElementById('FCD'),'input',function(){this.value=this.value.toUpperCase();var jn=document.getElementById('FJN');if(jn&&NJF.ctype)jn.textContent=genJN(NJF.ctype,this.value);});
+    var vsrch=document.getElementById('VSRCH');
+    if(vsrch){on(vsrch,'input',function(){vsearch(this.value);});on(vsrch,'keydown',vsk);}
+    document.addEventListener('click',function vsc(e){if(!e.target.closest('.vsw')){var r=document.getElementById('VSR');if(r)r.classList.remove('open');}});
+    eBtn('njN1',function(){saveS1();if(valS1()){NJS++;rSteps();renderNJS();}});
+  }else if(NJS===2){
+    w.innerHTML='<div class="card"><div class="ch">Device Information</div>'
+      +'<div class="g2" style="margin-bottom:9px"><div><label class="fl">Device Type <span class="rq">*</span></label><select class="fi" id="FDT"><option value="">-- Select --</option><option>Mobile / Smartphone</option><option>Laptop / Notebook</option><option>LED TV</option><option>Monitor / Display</option><option>Tablet / iPad</option><option>Printer</option><option>Desktop PC</option><option>IoT Device</option><option>Other</option></select></div>'
+      +'<div><label class="fl">Brand <span class="rq">*</span></label><input class="fi" id="FBR" value="'+esc(f.brand)+'" placeholder="Samsung, Dell, LG..."></div></div>'
+      +'<div class="g2" style="margin-bottom:9px"><div><label class="fl">Model <span class="rq">*</span></label><input class="fi" id="FMD" value="'+esc(f.model)+'"></div><div><label class="fl">Serial Number</label><input class="fi" id="FSR" value="'+esc(f.serial)+'"></div></div>'
+      +'<div class="g2" style="margin-bottom:9px"><div><label class="fl">IMEI</label><input class="fi" id="FIM" value="'+esc(f.imei)+'"></div><div><label class="fl">Warranty Status</label><select class="fi" id="FWR"><option'+(f.warr==='Unknown'?' selected':'')+'>Unknown</option><option'+(f.warr==='In Warranty'?' selected':'')+'>In Warranty</option><option'+(f.warr==='Out of Warranty'?' selected':'')+'>Out of Warranty</option></select></div></div>'
+      +'<div class="g3" id="SPECR" style="display:none;margin-bottom:9px"><div><label class="fl">RAM</label><input class="fi" id="FRA" value="'+esc(f.ram)+'" placeholder="8GB"></div><div><label class="fl">Storage</label><input class="fi" id="FST" value="'+esc(f.stor)+'" placeholder="256GB"></div><div><label class="fl">CPU</label><input class="fi" id="FCPU" value="'+esc(f.cpu)+'" placeholder="i5-12th"></div></div>'
+      +'</div><div style="display:flex;justify-content:space-between;margin-top:10px"><button class="btn bo" id="njB2">&#8592; Back</button><button class="btn bp" id="njN2">Next: Problem &#8594;</button></div>';
+    if(f.dtype)sv('FDT',f.dtype);
+    on(document.getElementById('FDT'),'change',function(){var show=['Laptop / Notebook','Tablet / iPad','Desktop PC'].indexOf(this.value)>=0;var el=document.getElementById('SPECR');if(el)el.style.display=show?'grid':'none';});
+    if(['Laptop / Notebook','Tablet / iPad','Desktop PC'].indexOf(f.dtype)>=0){var sp=document.getElementById('SPECR');if(sp)sp.style.display='grid';}
+    eBtn('njB2',function(){saveS2();NJS--;rSteps();renderNJS();});
+    eBtn('njN2',function(){saveS2();if(valS2()){NJS++;rSteps();renderNJS();}});
+  }else if(NJS===3){
+    var eOpts='<option value="">-- Unassigned --</option>'+DB.staff.map(function(s){return '<option value="'+s.name+'"'+(f.eng===s.name?' selected':'')+'>'+s.name+'</option>';}).join('');
+    w.innerHTML='<div class="card"><div class="ch">Problem &amp; Condition</div>'
+      +'<div style="margin-bottom:9px"><label class="fl">Problem Description <span class="rq">*</span></label><textarea class="fi" id="FPR" rows="3" placeholder="Describe the issue in detail...">'+esc(f.prob)+'</textarea></div>'
+      +'<div style="margin-bottom:9px"><label class="fl">Customer\'s Own Words</label><textarea class="fi" id="FVC" rows="2" placeholder="Exactly what the customer said...">'+esc(f.voc)+'</textarea></div>'
+      +'<div class="g2" style="margin-bottom:9px"><div><label class="fl">Physical Condition <span class="rq">*</span></label><select class="fi" id="FCN2"><option value="">-- Select --</option><option>Excellent - No damage</option><option>Good - Minor scratches</option><option>Fair - Visible wear</option><option>Poor - Cracked or broken</option><option>Severely Damaged</option></select></div>'
+      +'<div><label class="fl">Cosmetic Notes (on receipt)</label><input class="fi" id="FCS" value="'+esc(f.cosm)+'" placeholder="Cracked corner, dent..."></div></div>'
+      +'<div class="g2" style="margin-bottom:9px"><div><label class="fl">Assign Engineer</label><select class="fi" id="FENG">'+eOpts+'</select></div>'
+      +'<div><label class="fl">Priority</label><select class="fi" id="FPRI"><option'+(f.pri==='Normal'?' selected':'')+'>Normal</option><option'+(f.pri==='Urgent'?' selected':'')+'>Urgent</option><option'+(f.pri==='Express'?' selected':'')+'>Express</option></select></div></div>'
+      +'<div><label class="fl">Internal Note</label><input class="fi" id="FNT" value="'+esc(f.note)+'" placeholder="Internal staff note..."></div>'
+      +'</div><div style="display:flex;justify-content:space-between;margin-top:10px"><button class="btn bo" id="njB3">&#8592; Back</button><button class="btn bp" id="njN3">Review &#8594;</button></div>';
+    if(f.cond)sv('FCN2',f.cond);
+    eBtn('njB3',function(){saveS3();NJS--;rSteps();renderNJS();});
+    eBtn('njN3',function(){saveS3();if(valS3()){NJS++;rSteps();renderNJS();}});
+  }else if(NJS===4){
+    var jn2=genJN(f.ctype,f.code);
+    w.innerHTML='<div class="card"><div class="ch">Review &amp; Confirm</div>'
+      +'<div class="g2" style="margin-bottom:11px">'
+      +'<div><div class="fl" style="margin-bottom:3px">Job Number</div><div class="mono" style="font-size:14px;font-weight:800">'+jn2+'</div>'+(f.vjn?'<div style="font-size:10px;color:var(--amb)">Vendor: '+esc(f.vjn)+'</div>':'')+(f.b2bref?'<div style="font-size:10px;color:var(--t2)">Ref: '+esc(f.b2bref)+'</div>':'')+'</div>'
+      +'<div><div class="fl" style="margin-bottom:3px">Customer</div><span class="'+(f.ctype==='B2B'?'tb2b':'td2c')+'">'+f.ctype+'</span><div style="font-size:12px;font-weight:600;margin-top:3px">'+(f.ctype==='B2B'?esc(f.company)+' \u2014 '+esc(f.contact):esc(f.name))+'</div><div style="font-size:10px;color:var(--t2)">'+(f.ctype==='B2B'?esc(f.b2bph):esc(f.phone))+'</div></div>'
+      +'<div><div class="fl" style="margin-bottom:3px">Device</div><div style="font-weight:600">'+esc(f.brand)+' '+esc(f.model)+'</div><div style="font-size:10px;color:var(--t2)">'+esc(f.dtype)+'</div>'+(f.cosm?'<div style="font-size:10px;color:var(--amb)">'+esc(f.cosm)+'</div>':'')+'</div>'
+      +'<div><div class="fl" style="margin-bottom:3px">Intake</div><div style="font-size:10px">Engineer: '+(f.eng||'TBA')+'</div><div style="font-size:10px;color:var(--amb)">Priority: '+f.pri+'</div></div></div>'
+      +'<div style="border-top:1px solid var(--bdr);padding-top:10px"><div class="fl" style="margin-bottom:3px">Problem</div><div style="font-size:11px">'+esc(f.prob)+'</div></div>'
+      +'<div style="background:rgba(245,158,11,.08);border:1px dashed var(--amb);border-radius:6px;padding:8px;text-align:center;font-size:10px;color:var(--amb);margin-top:10px">Estimation will be added after diagnosis</div>'
+      +'</div><div style="display:flex;justify-content:space-between;margin-top:10px"><button class="btn bo" id="njB4">&#8592; Edit</button><button class="btn bg" id="njSUB">&#10003; Submit &amp; Print Receipt</button></div>';
+    eBtn('njB4',function(){NJS--;rSteps();renderNJS();});
+    eBtn('njSUB',submitJob);
+  }
+}
+function saveS1(){NJF.ctype=gv('FCT');NJF.name=gv('FNM');NJF.phone=gv('FPH');NJF.email=gv('FEM');NJF.addr=gv('FAD');NJF.company=gv('FCO');NJF.code=gv('FCD');NJF.vjn=gv('FVJ');NJF.b2bref=gv('FB2');NJF.contact=gv('FCN');NJF.b2bph=gv('FBP');NJF.b2bem=gv('FBE');NJF.sla=gv('FSL');}
+function saveS2(){NJF.dtype=gv('FDT');NJF.brand=gv('FBR');NJF.model=gv('FMD');NJF.serial=gv('FSR');NJF.imei=gv('FIM');NJF.warr=gv('FWR');NJF.ram=gv('FRA');NJF.stor=gv('FST');NJF.cpu=gv('FCPU');}
+function saveS3(){NJF.prob=gv('FPR');NJF.voc=gv('FVC');NJF.cond=gv('FCN2');NJF.cosm=gv('FCS');NJF.eng=gv('FENG');NJF.pri=gv('FPRI');NJF.note=gv('FNT');}
+function valS1(){var t=NJF.ctype||gv('FCT');if(!t){toast('Select customer type','er');return false;}if(t==='D2C'&&!gv('FNM').trim()){toast('Customer name required','er');return false;}if(t==='D2C'&&!gv('FPH').trim()){toast('Phone required','er');return false;}if(t==='B2B'&&(!gv('FCO').trim()||!gv('FCD').trim()||!gv('FVJ').trim()||!gv('FB2').trim()||!gv('FCN').trim()||!gv('FBP').trim())){toast('All B2B fields required','er');return false;}return true;}
+function valS2(){if(!gv('FDT')){toast('Device type required','er');return false;}if(!gv('FBR').trim()){toast('Brand required','er');return false;}if(!gv('FMD').trim()){toast('Model required','er');return false;}return true;}
+function valS3(){if(!gv('FPR').trim()){toast('Problem description required','er');return false;}if(!gv('FCN2')){toast('Physical condition required','er');return false;}return true;}
+
+function vsearch(q){var res=document.getElementById('VSR');if(!res)return;if(!q.trim()){res.classList.remove('open');return;}var m=DB.vendors.filter(function(v){return v.name.toLowerCase().indexOf(q.toLowerCase())>=0||v.code.toLowerCase().indexOf(q.toLowerCase())>=0;});if(!m.length){res.innerHTML='<div style="padding:8px;font-size:10px;color:var(--t3)">No vendors found</div>';res.classList.add('open');return;}res.innerHTML=m.map(function(v){return '<div class="vsi" data-vid="'+v.id+'"><div style="font-size:12px;font-weight:600">'+esc(v.name)+'</div><div style="font-size:10px;color:var(--t3)">'+v.code+(v.phone?' \u00b7 '+v.phone:'')+'</div></div>';}).join('');res.querySelectorAll('.vsi').forEach(function(el){el.addEventListener('click',function(){pickVen(el.getAttribute('data-vid'));});});res.classList.add('open');}
+function vsk(e){var items=document.getElementById('VSR').querySelectorAll('.vsi');if(e.key==='ArrowDown'){var hi=-1;items.forEach(function(x,i){if(x.style.background)hi=i;});hi=Math.min(hi+1,items.length-1);items.forEach(function(x,i){x.style.background=i===hi?'var(--bg4)':'';});}else if(e.key==='Enter'){var sel=document.querySelector('#VSR .vsi[style*="bg4"]');if(sel)sel.click();}else if(e.key==='Escape'){document.getElementById('VSR').classList.remove('open');}}
+function pickVen(id){var v=DB.vendors.find(function(x){return x.id===id;});if(!v)return;sv('VSRCH',v.name);document.getElementById('VSR').classList.remove('open');sv('FCO',v.name);sv('FCD',v.code);sv('FCN',v.contact||'');sv('FBP',v.phone||'');sv('FBE',v.email||'');sv('FSL',v.sla||'48');NJF.company=v.name;NJF.code=v.code;NJF.contact=v.contact||'';NJF.b2bph=v.phone||'';NJF.b2bem=v.email||'';var jn=document.getElementById('FJN');if(jn&&NJF.ctype)jn.textContent=genJN(NJF.ctype,v.code);toast(v.name+' selected','ok');}
+
+async function submitJob(){var btn=document.getElementById('njSUB');if(btn){btn.disabled=true;btn.textContent='Saving...';}var f=NJF,isB=f.ctype==='B2B',jn=genJN(f.ctype,f.code),now=new Date().toISOString();var phone=isB?f.b2bph:f.phone,isRpn=false,prevJ='';if(f.serial){var px=DB.jobs.find(function(j){return j.serial&&j.serial===f.serial;});if(px){isRpn=true;prevJ=px.jn;}}if(!isRpn&&isB&&f.vjn){var px2=DB.jobs.find(function(j){return j.vjn&&j.vjn===f.vjn;});if(px2){isRpn=true;prevJ=px2.jn;}}if(!isRpn&&phone){var px3=DB.jobs.find(function(j){return(j.phone&&j.phone===phone)||(j.b2bPhone&&j.b2bPhone===phone);});if(px3){isRpn=true;prevJ=px3.jn;}}if(isRpn&&!confirm('REOPEN DETECTED\nPrevious job: '+prevJ+'\nCreate a reopen job?')){if(btn){btn.disabled=false;btn.textContent='\u2713 Submit & Print Receipt';}return;}var job={id:Date.now().toString()+Math.random().toString(36).slice(2,4),jn:jn,vjn:isB?f.vjn:'',b2bref:isB?f.b2bref:'',ts:now,ctype:f.ctype,branch:CB,name:isB?f.contact:f.name,phone:isB?'':f.phone,email:isB?'':f.email,addr:f.addr,company:f.company,code:f.code,b2bPhone:isB?f.b2bph:'',b2bEmail:isB?f.b2bem:'',dtype:f.dtype,brand:f.brand,model:f.model,serial:f.serial,imei:f.imei,warr:f.warr,ram:f.ram,stor:f.stor,cpu:f.cpu,prob:f.prob,voc:f.voc,cond:f.cond,cosm:f.cosm,accs:'',eng:f.eng,pri:f.pri,note:f.note,sla:parseInt(f.sla)||72,status:isRpn?'Reopened':'Received',isRpn:isRpn,prevJ:prevJ,est:'',final:'',parts:'',labour:'',estNote:'',estAppr:'',payStatus:'Pending',paid:0,payMeth:'',repStart:'',repEnd:'',warExp:'',createdBy:CU?CU.name:'Admin',history:[{status:isRpn?'Reopened':'Received',ts:now,by:CU?CU.name:'Admin'}]};DB.jobs.unshift(job);await pushJob(job);logAct('JOB_CREATED',jn,'Job '+jn+' \u2014 '+f.brand+' '+f.model,null);if(btn){btn.disabled=false;btn.textContent='\u2713 Submit & Print Receipt';}toast(isRpn?'REOPEN: '+jn:'Job '+jn+' created!',isRpn?'er':'ok');updBadge();rDash();njReset();oMod('Receipt \u2014 '+jn,rcptHTML(job));}
+
+function rDash(){var jobs=DB.jobs,today=new Date().toDateString(),nm=new Date();var mon=jobs.filter(function(j){var d=new Date(j.ts);return d.getMonth()===nm.getMonth()&&d.getFullYear()===nm.getFullYear();});var rev=mon.filter(function(j){return j.final;}).reduce(function(s,j){return s+(parseFloat(j.final)||0);},0);st('K1',jobs.length);st('K2',jobs.filter(function(j){return['Delivered','Cancelled'].indexOf(j.status)<0;}).length);st('K3',jobs.filter(function(j){return new Date(j.ts).toDateString()===today;}).length);st('K4','&#8377;'+Math.round(rev));var dj=document.getElementById('DBJ');if(dj){dj.innerHTML=jobs.slice(0,8).map(function(j){return '<tr><td><span class="mono" style="font-size:10px">'+j.jn+'</span></td><td><span style="font-family:monospace;font-size:10px;color:var(--amb)">'+(j.vjn||'--')+'</span></td><td>'+esc(j.name)+(j.company?'<br><small style="color:var(--t3)">'+esc(j.company)+'</small>':'')+'</td><td>'+esc(j.brand)+' '+esc(j.model)+'</td><td>'+spill(j.status)+'</td><td>'+pbdg(j.payStatus)+'</td><td><button class="btn bp sm" data-eid="'+j.id+'">Edit</button></td></tr>';}).join('')||'<tr><td colspan="7" class="empty" style="padding:14px">No jobs yet \u2014 click + New Job</td></tr>';dj.querySelectorAll('[data-eid]').forEach(function(b){b.addEventListener('click',function(){oEdit(b.getAttribute('data-eid'));});});}var da=document.getElementById('DBA');if(da)da.innerHTML=DB.activityLog.slice(0,5).map(function(a){return '<div style="border-bottom:1px solid var(--bdr);padding:4px 0"><div style="color:var(--t);font-size:11px">'+a.title+'</div><div style="color:var(--t3);font-size:10px">'+a.user+' \u00b7 '+new Date(a.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+'</div></div>';}).join('')||'<div class="empty" style="padding:10px">No activity</div>';var dp=document.getElementById('DBP');if(dp){var pj=DB.jobs.filter(function(j){return j.payStatus==='Pending'&&j.final;}).slice(0,4);dp.innerHTML=pj.length?pj.map(function(j){return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr)"><span class="mono" style="font-size:10px">'+j.jn+'</span><span style="color:var(--red);font-size:11px">&#8377;'+j.final+'</span></div>';}).join(''):'<div class="empty" style="padding:8px">All clear!</div>';}}
+
+function rJobs(){var q=gv('JQ').toLowerCase(),st2=gv('JST'),tp=gv('JTP');var list=DB.jobs.filter(function(j){if(st2&&j.status!==st2)return false;if(tp&&j.ctype!==tp)return false;if(q&&[j.jn,j.vjn,j.b2bref,j.name,j.company,j.serial,j.phone,j.b2bPhone,j.brand,j.model,j.imei].join(' ').toLowerCase().indexOf(q)<0)return false;return true;});var body=document.getElementById('JTB'),emp=document.getElementById('JEM');if(!list.length){if(body)body.innerHTML='';if(emp)emp.style.display='block';return;}if(emp)emp.style.display='none';if(body){body.innerHTML=list.map(function(j){return '<tr><td><span class="mono" style="font-size:10px">'+j.jn+'</span>'+(j.isRpn?'<span style="background:#2b0520;color:#f9a8d4;padding:1px 4px;border-radius:3px;font-size:8px;margin-left:3px">RE</span>':'')+'</td><td><span style="font-family:monospace;font-size:10px;color:var(--amb)">'+(j.vjn||'--')+'</span></td><td style="font-size:10px;color:var(--pur)">'+(j.b2bref||'--')+'</td><td><span class="'+(j.ctype==='B2B'?'tb2b':'td2c')+'">'+j.ctype+'</span></td><td>'+esc(j.name)+(j.company?'<br><small style="color:var(--t3)">'+esc(j.company)+'</small>':'')+'</td><td>'+esc(j.brand)+' '+esc(j.model)+'</td><td style="font-size:10px">'+(j.eng||'--')+'</td><td>'+spill(j.status)+'</td><td>'+pbdg(j.payStatus)+'</td><td><div style="display:flex;gap:3px"><button class="btn bp sm" data-eid="'+j.id+'">Edit</button><button class="btn bo sm" data-rpt="'+j.id+'">Receipt</button>'+(CU&&CU.role==='Admin'?'<button class="btn br sm" data-del="'+j.id+'">Del</button>':'')+'</div></td></tr>';}).join('');body.querySelectorAll('[data-eid]').forEach(function(b){b.addEventListener('click',function(){oEdit(b.getAttribute('data-eid'));});});body.querySelectorAll('[data-rpt]').forEach(function(b){b.addEventListener('click',function(){var j=DB.jobs.find(function(x){return x.id===b.getAttribute('data-rpt');});if(j)oMod('Receipt',rcptHTML(j));});});body.querySelectorAll('[data-del]').forEach(function(b){b.addEventListener('click',function(){trash(b.getAttribute('data-del'));});});}}
+
+function doSearch(){var by=gv('SBY'),q=gv('SBQ').toLowerCase().trim(),w=document.getElementById('SRW'),e=document.getElementById('SRE');if(!q){if(w)w.style.display='none';if(e){e.style.display='block';e.textContent='Enter a search term above';}return;}var fns={all:function(j){return JSON.stringify(j).toLowerCase().indexOf(q)>=0;},jn:function(j){return j.jn.toLowerCase().indexOf(q)>=0;},vjn:function(j){return(j.vjn||'').toLowerCase().indexOf(q)>=0;},b2bref:function(j){return(j.b2bref||'').toLowerCase().indexOf(q)>=0;},serial:function(j){return(j.serial||'').toLowerCase().indexOf(q)>=0;},phone:function(j){return(j.phone||j.b2bPhone||'').indexOf(q)>=0;},name:function(j){return j.name.toLowerCase().indexOf(q)>=0;},company:function(j){return(j.company||'').toLowerCase().indexOf(q)>=0;}};var res=DB.jobs.filter(fns[by]||fns.all);if(!res.length){if(w)w.style.display='none';if(e){e.style.display='block';e.textContent='No results for "'+q+'"';}return;}if(w)w.style.display='block';if(e)e.style.display='none';var b=document.getElementById('SRB');if(b){b.innerHTML=res.map(function(j){return '<tr><td><span class="mono" style="font-size:10px">'+j.jn+'</span></td><td><span style="font-family:monospace;font-size:10px;color:var(--amb)">'+(j.vjn||'--')+'</span></td><td><span class="'+(j.ctype==='B2B'?'tb2b':'td2c')+'">'+j.ctype+'</span></td><td>'+esc(j.name)+(j.company?'<br><small style="color:var(--t3)">'+esc(j.company)+'</small>':'')+'</td><td>'+esc(j.brand)+' '+esc(j.model)+'</td><td>'+spill(j.status)+'</td><td style="font-size:10px">'+new Date(j.ts).toLocaleDateString('en-IN')+'</td><td><button class="btn bp sm" data-eid="'+j.id+'">Edit</button></td></tr>';}).join('');b.querySelectorAll('[data-eid]').forEach(function(b2){b2.addEventListener('click',function(){oEdit(b2.getAttribute('data-eid'));});});}}
+
+function rEng(){var ef=gv('EFE'),sf=gv('EFS'),sel2=document.getElementById('EFE');if(sel2){var cur=sel2.value;sel2.innerHTML='<option value="">All Engineers</option>';DB.staff.filter(function(s){return s.role==='Engineer'||s.role==='Admin';}).forEach(function(s){sel2.innerHTML+='<option value="'+s.name+'"'+(cur===s.name?' selected':'')+'>'+s.name+'</option>';});}var list=DB.jobs.filter(function(j){return['Received','Under Diagnosis','Waiting Approval','Repair In Progress','Completed'].indexOf(j.status)>=0;});if(ef)list=list.filter(function(j){return j.eng===ef;});if(sf)list=list.filter(function(j){return j.status===sf;});var body=document.getElementById('ETB2');if(!body)return;if(!list.length){body.innerHTML='<tr><td colspan="9" class="empty" style="padding:14px">No active jobs</td></tr>';return;}body.innerHTML=list.map(function(j){var tat=Math.round((new Date()-new Date(j.ts))/3600000);return '<tr><td><span class="mono" style="font-size:10px">'+j.jn+'</span>'+(j.vjn?'<br><span style="font-family:monospace;font-size:9px;color:var(--amb)">'+j.vjn+'</span>':'')+'</td><td>'+esc(j.name)+(j.company?'<br><small style="color:var(--t3)">'+esc(j.company)+'</small>':'')+'</td><td>'+esc(j.brand)+' '+esc(j.model)+'</td><td style="font-size:10px;max-width:100px;color:var(--t2)">'+(j.prob||'').slice(0,50)+'</td><td>'+spill(j.status)+'</td><td style="font-size:10px;color:'+(j.pri==='Urgent'?'var(--red)':j.pri==='Express'?'var(--amb)':'var(--t2)')+'">'+j.pri+'</td><td style="font-size:10px">'+tat+'h</td><td><select class="fi" style="padding:3px 6px;font-size:10px;width:auto" data-sid="'+j.id+'"><option value="">Update...</option>'+SL.slice(0,7).map(function(s){return '<option'+(j.status===s?' selected':'')+' value="'+s+'">'+s+'</option>';}).join('')+'</select></td></tr>';}).join('');body.querySelectorAll('[data-sid]').forEach(function(sel3){sel3.addEventListener('change',function(){if(sel3.value){updSt(sel3.getAttribute('data-sid'),sel3.value);sel3.value='';}});});}
+async function updSt(id,ns){var j=DB.jobs.find(function(x){return x.id===id;});if(!j)return;var os=j.status,now=new Date().toISOString();j.status=ns;if(ns==='Repair In Progress'&&!j.repStart)j.repStart=now;if((ns==='Completed'||ns==='Delivered')&&!j.repEnd){j.repEnd=now;var wd=new Date(now);wd.setDate(wd.getDate()+(DB.settings.wd||30));j.warExp=wd.toISOString();}j.history=j.history||[];j.history.push({status:ns,ts:now,by:CU?CU.name:'Staff',prev:os});logAct('STATUS_CHANGED',j.jn,'Status: '+os+' \u2192 '+ns,{from:os,to:ns});await pushJob(j);toast(j.jn+' \u2192 '+ns,'ok');rEng();rJobs();rDash();updBadge();}
+
+function rEst(){var list=DB.jobs.filter(function(j){return['Delivered','Cancelled'].indexOf(j.status)<0;});var body=document.getElementById('ESTB');if(!body)return;if(!list.length){body.innerHTML='<tr><td colspan="8" class="empty" style="padding:14px">No active jobs</td></tr>';return;}body.innerHTML=list.map(function(j){return '<tr><td><span class="mono" style="font-size:10px">'+j.jn+'</span></td><td>'+esc(j.name)+'</td><td>'+esc(j.brand)+' '+esc(j.model)+'</td><td style="font-size:10px;max-width:120px;color:var(--t2)">'+(j.prob||'').slice(0,60)+'</td><td>'+spill(j.status)+'</td><td>'+(j.est?'<span style="color:var(--grn)">&#8377;'+j.est+'</span>':'<span style="color:var(--t3)">Not set</span>')+'</td><td>'+(j.estAppr?'<span style="font-size:10px;font-weight:700;color:'+(j.estAppr==='Approved'?'var(--grn)':'var(--red)')+'">'+j.estAppr+'</span>':'<span style="color:var(--t3);font-size:10px">Pending</span>')+'</td><td><button class="btn bp sm" data-eid="'+j.id+'">Edit</button></td></tr>';}).join('');body.querySelectorAll('[data-eid]').forEach(function(b){b.addEventListener('click',function(){oEdit(b.getAttribute('data-eid'));});});}
+
+function rPay(){var jobs=DB.jobs.filter(function(j){return j.final||j.est;});var tot=jobs.reduce(function(s,j){return s+(parseFloat(j.final||j.est)||0);},0),rcvd=jobs.reduce(function(s,j){return s+(j.paid||0);},0),pend=jobs.filter(function(j){return j.payStatus==='Pending';}).reduce(function(s,j){return s+(parseFloat(j.final||j.est)||0);},0);st('PK1','&#8377;'+Math.round(tot));st('PK2','&#8377;'+Math.round(rcvd));st('PK3','&#8377;'+Math.round(pend));st('PK4','&#8377;'+Math.round(tot-rcvd));var body=document.getElementById('PB');if(!body)return;if(!jobs.length){body.innerHTML='<tr><td colspan="9" class="empty" style="padding:14px">No records</td></tr>';return;}body.innerHTML=jobs.map(function(j){var amt=parseFloat(j.final||j.est)||0,paid=j.paid||0,bal=amt-paid;return '<tr><td><span class="mono" style="font-size:10px">'+j.jn+'</span></td><td>'+esc(j.name)+'</td><td>'+esc(j.brand)+' '+esc(j.model)+'</td><td>&#8377;'+amt+'</td><td style="color:var(--grn)">&#8377;'+paid+'</td><td style="color:'+(bal>0?'var(--red)':'var(--grn)')+'">&#8377;'+bal+'</td><td style="font-size:10px">'+(j.payMeth||'--')+'</td><td>'+pbdg(j.payStatus)+'</td><td><button class="btn bp sm" data-eid="'+j.id+'">Update</button></td></tr>';}).join('');body.querySelectorAll('[data-eid]').forEach(function(b){b.addEventListener('click',function(){oEdit(b.getAttribute('data-eid'));});});}
+
+function rWarr(){var now=new Date(),wj=DB.jobs.filter(function(j){return j.warExp||((j.status==='Completed'||j.status==='Delivered')&&j.repEnd);});var body=document.getElementById('WRB');if(!body)return;if(!wj.length){body.innerHTML='<tr><td colspan="8" class="empty" style="padding:14px">No warranty records</td></tr>';return;}body.innerHTML=wj.map(function(j){var exp=j.warExp?new Date(j.warExp):new Date(new Date(j.repEnd).getTime()+(DB.settings.wd||30)*86400000),expired=exp<now,days=Math.ceil((exp-now)/86400000);return '<tr><td><span class="mono" style="font-size:10px">'+j.jn+'</span></td><td>'+esc(j.name)+'</td><td>'+esc(j.brand)+' '+esc(j.model)+'</td><td style="font-size:10px;max-width:100px">'+(j.prob||'').slice(0,50)+'</td><td style="font-size:10px">'+(j.repEnd?new Date(j.repEnd).toLocaleDateString('en-IN'):'--')+'</td><td style="font-size:10px;color:'+(expired?'var(--red)':'var(--grn)')+'">'+exp.toLocaleDateString('en-IN')+'</td><td><span class="py '+(expired?'pn':days<=7?'pt':'pp')+'">'+(expired?'Expired':days+'d left')+'</span></td><td><button class="btn bo sm" data-wid="'+j.id+'">Claim</button></td></tr>';}).join('');body.querySelectorAll('[data-wid]').forEach(function(b){b.addEventListener('click',function(){claimW(b.getAttribute('data-wid'));});});}
+async function claimW(id){var j=DB.jobs.find(function(x){return x.id===id;});if(!j)return;var r=prompt('Warranty claim for '+j.jn+'\nDescribe the issue:');if(!r)return;var now=new Date().toISOString();var clm=JSON.parse(JSON.stringify(j));clm.id=Date.now().toString();clm.jn=genJN(j.ctype,j.code);clm.ts=now;clm.status='Received';clm.isRpn=true;clm.prevJ=j.jn;clm.warExp='';clm.repStart='';clm.repEnd='';clm.est='';clm.final='';clm.paid=0;clm.payStatus='Pending';clm.history=[{status:'Received',ts:now,by:CU?CU.name:'Staff',note:'WARRANTY: '+r}];DB.jobs.unshift(clm);await pushJob(clm);logAct('WARRANTY_CLAIMED',clm.jn,'Warranty: '+j.jn+' \u2192 '+clm.jn,null);rWarr();rJobs();updBadge();toast('Claim created: '+clm.jn,'ok');}
+
+function rComms(){var body=document.getElementById('CMB');if(!body)return;if(!DB.comms.length){body.innerHTML='<tr><td colspan="7" class="empty" style="padding:14px">No communications logged</td></tr>';return;}body.innerHTML=DB.comms.slice(0,100).map(function(c){return '<tr><td style="font-size:10px;color:var(--t3)">'+new Date(c.ts).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+'</td><td><span class="mono" style="font-size:10px">'+(c.jn||'--')+'</span></td><td>'+esc(c.cust)+'</td><td><span class="sp s1">'+esc(c.ch)+'</span></td><td style="font-size:10px">'+esc(c.dir)+'</td><td style="font-size:11px">'+esc(c.msg)+'</td><td style="font-size:10px;color:var(--acc)">'+esc(c.by)+'</td></tr>';}).join('');}
+function addComm(){oMod('Log Communication','<div style="display:flex;flex-direction:column;gap:9px"><div class="g2"><div><label class="fl">Job# (optional)</label><input class="fi" id="CMJ"></div><div><label class="fl">Customer Name</label><input class="fi" id="CMN"></div></div><div class="g2"><div><label class="fl">Channel</label><select class="fi" id="CMC"><option>WhatsApp</option><option>SMS</option><option>Phone Call</option><option>Email</option><option>In-Person</option><option>Other</option></select></div><div><label class="fl">Direction</label><select class="fi" id="CMD"><option>Outgoing (We contacted)</option><option>Incoming (They contacted)</option></select></div></div><div><label class="fl">Message / Note <span class="rq">*</span></label><textarea class="fi" id="CMM" rows="3" placeholder="What was communicated..."></textarea></div></div><div style="display:flex;gap:7px;justify-content:flex-end;margin-top:10px"><button class="btn bo sm" id="cmCan">Cancel</button><button class="btn bg sm" id="cmSv">Log</button></div>');eBtn('cmCan',cMod);eBtn('cmSv',saveComm);}
+async function saveComm(){var msg=gv('CMM').trim();if(!msg){toast('Message required','er');return;}var c={id:Date.now().toString(),jn:gv('CMJ'),cust:gv('CMN'),ch:gv('CMC'),dir:gv('CMD'),msg:msg,ts:new Date().toISOString(),by:CU?CU.name:'Staff'};DB.comms.unshift(c);save();if(SBURL)await sbUp('comms',{id:c.id,data:c,created_at:c.ts});logAct('COMM_LOGGED',c.jn||null,c.ch+': '+c.cust,null);cMod();rComms();toast('Logged','ok');}
+
+function rAct(){var uf=gv('AFU'),tf=gv('AFT'),list=DB.activityLog.slice();if(uf)list=list.filter(function(a){return a.user===uf;});if(tf)list=list.filter(function(a){return a.type===tf;});var sel2=document.getElementById('AFU');if(sel2){var cur=sel2.value;sel2.innerHTML='<option value="">All Staff</option>';var users=[...new Set(DB.activityLog.map(function(a){return a.user;}))];users.forEach(function(u){sel2.innerHTML+='<option value="'+u+'"'+(cur===u?' selected':'')+'>'+u+'</option>';});}var el=document.getElementById('ACL');if(!el)return;if(!list.length){el.innerHTML='<div class="empty" style="padding:24px">No activity yet</div>';return;}el.innerHTML=list.slice(0,100).map(function(a){var d=new Date(a.ts),ts2=d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});return '<div style="display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr)"><div style="flex:1"><div style="font-size:11px;color:var(--t)">'+a.title+'</div>'+(a.chg?'<div style="font-size:10px"><span style="color:var(--red);text-decoration:line-through">'+esc(String(a.chg.from||''))+'</span> \u2192 <span style="color:var(--grn)">'+esc(String(a.chg.to||''))+'</span></div>':'')+'<div style="font-size:10px;color:var(--acc)">'+a.user+(a.jid?' \u00b7 <span style="font-family:monospace">'+a.jid+'</span>':'')+'<span style="color:var(--t3)"> \u00b7 '+ts2+'</span></div></div></div>';}).join('');}
+
+function rInv(){var body=document.getElementById('IVB');if(!body)return;if(!DB.invoices.length){body.innerHTML='<tr><td colspan="9" class="empty" style="padding:14px">No invoices yet</td></tr>';return;}body.innerHTML=DB.invoices.map(function(iv){return '<tr><td style="font-family:monospace;font-size:10px">'+iv.ivn+'</td><td><span class="mono" style="font-size:10px">'+iv.jn+'</span></td><td>'+esc(iv.cust)+'</td><td style="font-size:10px">'+new Date(iv.date).toLocaleDateString('en-IN')+'</td><td>&#8377;'+iv.base+'</td><td>&#8377;'+iv.gst+'</td><td style="font-weight:700">&#8377;'+iv.total+'</td><td>'+pbdg(iv.payStatus||'Pending')+'</td><td><button class="btn bo sm" data-ivid="'+iv.id+'">Print</button></td></tr>';}).join('');body.querySelectorAll('[data-ivid]').forEach(function(b){b.addEventListener('click',function(){printInv(b.getAttribute('data-ivid'));});});}
+function genInv(){var done=DB.jobs.filter(function(j){return(j.status==='Completed'||j.status==='Delivered')&&j.final&&!DB.invoices.find(function(iv){return iv.jid===j.id;});});if(!done.length){toast('No completed jobs without invoices','if');return;}oMod('Generate Invoice','<div style="margin-bottom:10px"><label class="fl">Select Job</label><select class="fi" id="IVS"><option value="">-- Select --</option>'+done.map(function(j){return '<option value="'+j.id+'">'+j.jn+' \u2014 '+esc(j.name)+' \u2014 &#8377;'+j.final+'</option>';}).join('')+'</select></div><div style="display:flex;gap:7px;justify-content:flex-end"><button class="btn bo sm" id="ivCan">Cancel</button><button class="btn bg sm" id="ivGen">Generate</button></div>');eBtn('ivCan',cMod);eBtn('ivGen',createInv);}
+async function createInv(){var jid=gv('IVS');if(!jid){toast('Select a job','er');return;}var job=DB.jobs.find(function(j){return j.id===jid;});if(!job)return;var s=DB.settings,gr=s.gstRate||18,base=parseFloat(job.final)||0,gst=Math.round(base*gr/100*100)/100,total=base+gst;var iv={id:Date.now().toString(),ivn:(s.invPfx||'INV')+'-'+new Date().getFullYear()+p2(new Date().getMonth()+1)+'-'+p3(DB.invoices.length+1),jid:job.id,jn:job.jn,cust:job.name,phone:job.phone||job.b2bPhone,company:job.company,b2bref:job.b2bref,device:job.brand+' '+job.model,prob:job.prob,date:new Date().toISOString(),base:base,gstRate:gr,gst:gst,total:total,payStatus:job.payStatus||'Pending',by:CU?CU.name:'Admin'};DB.invoices.unshift(iv);save();if(SBURL)await sbUp('invoices',{id:iv.id,data:iv,created_at:iv.date});logAct('INVOICE_CREATED',job.jn,'Invoice '+iv.ivn,null);cMod();rInv();toast(iv.ivn+' created','ok');printInv(iv.id);}
+function printInv(ivid){var iv=DB.invoices.find(function(x){return x.id===ivid;});if(!iv)return;var s=DB.settings,w=window.open('','_blank');if(!w)return;w.document.write('<html><head><title>'+iv.ivn+'</title><style>body{font-family:Arial,sans-serif;margin:20px;font-size:11px}table{border-collapse:collapse;width:100%}td,th{padding:5px 8px;border:1px solid #ccc}th{background:#f5f5f5}.nb{border:none}</style></head><body><table><tr><td class="nb"><h2 style="margin:0">'+(s.bn||'The Next G')+'</h2><div>'+(s.ba||'')+'</div><div>'+(s.bp||'')+(s.be?' | '+s.be:'')+'</div>'+(s.gst?'<div>GST: '+s.gst+'</div>':'')+'</td><td class="nb" style="text-align:right"><h2 style="margin:0;color:#6366f1">TAX INVOICE</h2><div>'+iv.ivn+'</div><div>'+new Date(iv.date).toLocaleDateString('en-IN')+'</div></td></tr></table><table style="margin:10px 0"><tr><td class="nb"><strong>Bill To:</strong><br>'+iv.cust+(iv.company?'<br>'+iv.company:'')+(iv.b2bref?'<br>Ref: '+iv.b2bref:'')+'<br>'+(iv.phone||'')+'</td></tr></table><table><thead><tr><th>Description</th><th>Amount</th></tr></thead><tbody><tr><td>Repair: '+iv.device+'</td><td style="text-align:right">&#8377;'+iv.base.toFixed(2)+'</td></tr></tbody><tfoot><tr><td style="text-align:right">GST @ '+iv.gstRate+'%</td><td style="text-align:right">&#8377;'+iv.gst.toFixed(2)+'</td></tr><tr><td style="text-align:right"><strong>TOTAL</strong></td><td style="text-align:right"><strong>&#8377;'+iv.total.toFixed(2)+'</strong></td></tr></tfoot></table><div style="margin-top:30px;display:flex;justify-content:space-between"><div>Customer: _______________</div><div>Authorized: _______________</div></div></body></html>');w.document.close();w.focus();setTimeout(function(){w.print();},400);}
+
+function rParts(){var q=gv('PQ').toLowerCase();var list=q?DB.parts.filter(function(p){return p.name.toLowerCase().indexOf(q)>=0||(p.sku||'').toLowerCase().indexOf(q)>=0;}):DB.parts;var body=document.getElementById('PTB');if(!body)return;if(!list.length){body.innerHTML='<tr><td colspan="11" class="empty" style="padding:14px">No parts</td></tr>';return;}body.innerHTML=list.map(function(p){var low=p.stock<=p.min;return '<tr><td style="font-weight:500">'+esc(p.name)+'</td><td style="font-family:monospace;font-size:10px;color:var(--cyn)">'+(p.sku||'--')+'</td><td style="font-size:10px">'+esc(p.cat)+'</td><td style="font-size:10px;color:var(--t3)">'+(p.compat||'--')+'</td><td style="font-size:13px;font-weight:700;color:'+(low?'var(--red)':'var(--grn)')+'">'+p.stock+'</td><td style="font-size:10px;color:var(--t3)">'+p.min+'</td><td>&#8377;'+p.cost+'</td><td>&#8377;'+p.sell+'</td><td style="font-size:10px;color:var(--t3)">'+(p.loc||'--')+'</td><td><span class="py '+(low?'pn':'pp')+'">'+(low?'LOW':'OK')+'</span></td><td><button class="btn bo sm" data-adj="'+p.id+'">+/- Stock</button></td></tr>';}).join('');body.querySelectorAll('[data-adj]').forEach(function(b){b.addEventListener('click',function(){adjStock(b.getAttribute('data-adj'));});});}
+function addPart(){oMod('Add Spare Part','<div style="display:flex;flex-direction:column;gap:9px"><div class="g2"><div><label class="fl">Name <span class="rq">*</span></label><input class="fi" id="PTNM"></div><div><label class="fl">SKU</label><input class="fi" id="PTSK"></div></div><div class="g2"><div><label class="fl">Category</label><select class="fi" id="PTCT"><option>Battery</option><option>Screen/Display</option><option>Charging Port</option><option>Speaker</option><option>Camera</option><option>Motherboard</option><option>Keyboard</option><option>RAM</option><option>Storage/SSD</option><option>Power Adapter</option><option>Other</option></select></div><div><label class="fl">Compatible</label><input class="fi" id="PTCM" placeholder="Samsung S22, Dell XPS..."></div></div><div class="g3"><div><label class="fl">Stock</label><input class="fi" id="PTST" type="number" value="0"></div><div><label class="fl">Min Alert</label><input class="fi" id="PTMN" type="number" value="2"></div><div><label class="fl">Location</label><input class="fi" id="PTLC" placeholder="Shelf A2"></div></div><div class="g2"><div><label class="fl">Cost &#8377;</label><input class="fi" id="PTCO" type="number" value="0"></div><div><label class="fl">Sell &#8377;</label><input class="fi" id="PTSL" type="number" value="0"></div></div></div><div style="display:flex;gap:7px;justify-content:flex-end;margin-top:10px"><button class="btn bo sm" id="ptCan">Cancel</button><button class="btn bg sm" id="ptSv">Save</button></div>');eBtn('ptCan',cMod);eBtn('ptSv',savePart);}
+async function savePart(){var nm=gv('PTNM').trim();if(!nm){toast('Name required','er');return;}var p={id:Date.now().toString(),name:nm,sku:gv('PTSK'),cat:gv('PTCT'),compat:gv('PTCM'),stock:parseInt(gv('PTST'))||0,min:parseInt(gv('PTMN'))||2,loc:gv('PTLC'),cost:parseFloat(gv('PTCO'))||0,sell:parseFloat(gv('PTSL'))||0};DB.parts.unshift(p);save();if(SBURL)await sbUp('parts',{id:p.id,data:p});cMod();rParts();toast(nm+' added','ok');}
+function adjStock(id){var p=DB.parts.find(function(x){return x.id===id;});if(!p)return;var q=prompt(p.name+'\nCurrent: '+p.stock+'\nAdd qty (use minus to remove):','0');if(q===null)return;var n=parseInt(q);if(isNaN(n)){toast('Invalid number','er');return;}p.stock=Math.max(0,p.stock+n);save();if(SBURL)sbUp('parts',{id:p.id,data:p});rParts();toast(p.name+': stock now '+p.stock,'ok');}
+
+function rVendors(){var q=gv('VLQ').toLowerCase();var list=DB.vendors.filter(function(v){return !q||[v.name,v.code,v.contact||'',v.email||''].join(' ').toLowerCase().indexOf(q)>=0;});var g=document.getElementById('VNG'),emp=document.getElementById('VNE');if(!list.length){if(g)g.innerHTML='';if(emp)emp.style.display='block';return;}if(emp)emp.style.display='none';if(g){g.innerHTML=list.map(function(v){return '<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:12px;position:relative"><div style="position:absolute;top:8px;right:8px;display:flex;gap:4px"><button class="btn bo sm" data-veid="'+v.id+'">Edit</button><button class="btn br sm" data-vdel="'+v.id+'">Del</button></div><div style="font-size:13px;font-weight:700;padding-right:90px">'+esc(v.name)+'</div><div style="font-family:monospace;font-size:10px;color:#60a5fa;margin-top:2px">'+esc(v.code)+'</div><div style="font-size:10px;color:var(--t3);margin-top:4px">'+(v.contact||'')+'</div><div style="font-size:10px;color:var(--t3)">'+(v.phone||'')+(v.email?' \u00b7 '+v.email:'')+'</div>'+(v.gst?'<div style="font-size:10px;color:var(--t3)">GST: '+v.gst+'</div>':'')+'</div>';}).join('');g.querySelectorAll('[data-veid]').forEach(function(b){b.addEventListener('click',function(){oVF(b.getAttribute('data-veid'));});});g.querySelectorAll('[data-vdel]').forEach(function(b){b.addEventListener('click',function(){dVen(b.getAttribute('data-vdel'));});});}}
+function oVF(eid){var v=eid?DB.vendors.find(function(x){return x.id===eid;}):null;oMod(v?'Edit Vendor':'Add Vendor','<div style="display:flex;flex-direction:column;gap:9px"><div class="g2"><div><label class="fl">Company <span class="rq">*</span></label><input class="fi" id="VFNM" value="'+esc(v?v.name||'':'')+'"></div><div><label class="fl">Code <span class="rq">*</span></label><input class="fi" id="VFCD" value="'+esc(v?v.code||'':'')+'" maxlength="6"></div></div><div class="g2"><div><label class="fl">Contact Person</label><input class="fi" id="VFCT" value="'+esc(v?v.contact||'':'')+'"></div><div><label class="fl">Phone</label><input class="fi" id="VFPH" value="'+esc(v?v.phone||'':'')+'"></div></div><div class="g2"><div><label class="fl">Email</label><input class="fi" id="VFEM" type="email" value="'+esc(v?v.email||'':'')+'"></div><div><label class="fl">Address</label><input class="fi" id="VFAD" value="'+esc(v?v.addr||'':'')+'"></div></div><div class="g2"><div><label class="fl">GST</label><input class="fi" id="VFGT" value="'+esc(v?v.gst||'':'')+'"></div><div><label class="fl">SLA Hours</label><input class="fi" id="VFSL" type="number" value="'+(v?v.sla||48:48)+'"></div></div><div><label class="fl">Notes</label><textarea class="fi" id="VFNT" rows="2">'+esc(v?v.notes||'':'')+'</textarea></div></div><div style="display:flex;gap:7px;justify-content:flex-end;margin-top:10px"><button class="btn bo sm" id="vfCan">Cancel</button><button class="btn bg sm" id="vfSv">Save</button></div>');eBtn('vfCan',cMod);eBtn('vfSv',function(){sVen(eid||'');});}
+async function sVen(eid){var nm=gv('VFNM').trim(),cd=gv('VFCD').trim();if(!nm||!cd){toast('Company and code required','er');return;}var v={id:eid||Date.now().toString(),name:nm,code:cd.toUpperCase(),contact:gv('VFCT'),phone:gv('VFPH'),email:gv('VFEM'),addr:gv('VFAD'),gst:gv('VFGT'),sla:gv('VFSL')||'48',notes:gv('VFNT')};if(eid){var i=DB.vendors.findIndex(function(x){return x.id===eid;});if(i>=0)DB.vendors[i]=v;}else DB.vendors.push(v);save();if(SBURL)await sbUp('vendors',{id:v.id,data:v});cMod();rVendors();toast(nm+' saved','ok');}
+async function dVen(id){if(!confirm('Delete this vendor?'))return;if(SBURL)await sbDel('vendors',id);DB.vendors=DB.vendors.filter(function(x){return x.id!==id;});save();rVendors();}
+
+function rBin(){var bin=DB.deletedJobs||[];updBadge();var body=document.getElementById('RBB'),emp=document.getElementById('RBE');if(!bin.length){if(body)body.innerHTML='';if(emp)emp.style.display='block';return;}if(emp)emp.style.display='none';if(body){body.innerHTML=bin.map(function(j){return '<tr><td><span class="mono" style="font-size:10px;color:var(--red)">'+j.jn+'</span></td><td><span style="font-family:monospace;font-size:10px;color:var(--amb)">'+(j.vjn||'--')+'</span></td><td><span class="'+(j.ctype==='B2B'?'tb2b':'td2c')+'">'+j.ctype+'</span></td><td>'+esc(j.name)+'</td><td>'+esc(j.brand)+' '+esc(j.model)+'</td><td>'+spill(j.status)+'</td><td style="font-size:10px;color:var(--acc)">'+(j.deletedBy||'--')+'</td><td style="font-size:10px;color:var(--t3)">'+(j.deletedAt?new Date(j.deletedAt).toLocaleDateString('en-IN'):'--')+'</td><td><div style="display:flex;gap:3px"><button class="btn bg sm" data-res="'+j.origId+'">Restore</button><button class="btn br sm" data-pur="'+j.origId+'">Purge</button></div></td></tr>';}).join('');body.querySelectorAll('[data-res]').forEach(function(b){b.addEventListener('click',function(){restoreJob(b.getAttribute('data-res'));});});body.querySelectorAll('[data-pur]').forEach(function(b){b.addEventListener('click',function(){purgeJob(b.getAttribute('data-pur'));});});}}
+function restoreJob(origId){var bin=DB.deletedJobs||[],j=bin.find(function(x){return x.origId===origId;});if(!j)return;var r=JSON.parse(JSON.stringify(j));delete r.deletedAt;delete r.deletedBy;delete r.origId;if(DB.jobs.find(function(x){return x.jn===r.jn;}))r.jn=r.jn+'-RST';r.id=origId;r.history=r.history||[];r.history.push({status:r.status,ts:new Date().toISOString(),by:CU?CU.name:'Admin',note:'Restored from Bin'});DB.jobs.unshift(r);DB.deletedJobs=bin.filter(function(x){return x.origId!==origId;});logAct('JOB_CREATED',r.jn,'Restored: '+r.jn,null);pushJob(r);save();rBin();rAll();toast('Restored: '+r.jn,'ok');}
+function purgeJob(origId){var j=(DB.deletedJobs||[]).find(function(x){return x.origId===origId;});if(!confirm('Permanently delete '+(j&&j.jn||'this job')+'? Cannot be undone.'))return;DB.deletedJobs=(DB.deletedJobs||[]).filter(function(x){return x.origId!==origId;});save();rBin();toast('Permanently deleted','ok');}
+function emptyBin(){if(!(DB.deletedJobs&&DB.deletedJobs.length)){toast('Bin is empty','if');return;}if(!confirm('Permanently delete ALL '+DB.deletedJobs.length+' jobs? Cannot be undone.'))return;DB.deletedJobs=[];save();rBin();toast('Bin emptied','ok');}
+async function trash(id){var j=DB.jobs.find(function(x){return x.id===id;});if(!j)return;if(!confirm('Move '+j.jn+' to Recycle Bin?'))return;var copy=JSON.parse(JSON.stringify(j));copy.deletedAt=new Date().toISOString();copy.deletedBy=CU?CU.name:'Admin';copy.origId=id;DB.deletedJobs=DB.deletedJobs||[];DB.deletedJobs.unshift(copy);DB.jobs=DB.jobs.filter(function(x){return x.id!==id;});logAct('JOB_DELETED',j.jn,'Moved to Recycle Bin',null);if(SBURL)await sbDel('jobs',id);save();cMod();rAll();updBadge();toast('Moved to Recycle Bin','ok');}
+
+function oEdit(id){var j=DB.jobs.find(function(x){return x.id===id;});if(!j)return;var eOpts='<option value="">-- Unassigned --</option>'+DB.staff.map(function(s){return '<option value="'+s.name+'"'+(j.eng===s.name?' selected':'')+'>'+s.name+'</option>';}).join('');
+oMod('Edit \u2014 '+j.jn,'<div class="tabs" id="ETABS"><button class="tab on" data-et="E1">Customer</button><button class="tab" data-et="E2">Device</button><button class="tab" data-et="E3">Problem</button><button class="tab" data-et="E4">Status</button><button class="tab" data-et="E5">Estimation</button><button class="tab" data-et="E6">Payment</button><button class="tab" data-et="E7">History</button></div>'
++'<div id="E1"><div class="g2" style="margin-bottom:9px"><div><label class="fl">Name</label><input class="fi" id="EN" value="'+esc(j.name||'')+'"></div><div><label class="fl">Phone</label><input class="fi" id="EP" value="'+esc(j.phone||j.b2bPhone||'')+'"></div></div><div class="g2" style="margin-bottom:9px"><div><label class="fl">Email</label><input class="fi" id="EE" value="'+esc(j.email||j.b2bEmail||'')+'"></div><div><label class="fl">Company</label><input class="fi" id="EC" value="'+esc(j.company||'')+'"></div></div><div class="g2"><div><label class="fl">Vendor Job#</label><input class="fi" id="EVJ" value="'+esc(j.vjn||'')+'"></div><div><label class="fl">B2B Ref#</label><input class="fi" id="EB2" value="'+esc(j.b2bref||'')+'"></div></div></div>'
++'<div id="E2" style="display:none"><div class="g2" style="margin-bottom:9px"><div><label class="fl">Device Type</label><input class="fi" id="EDT" value="'+esc(j.dtype||'')+'"></div><div><label class="fl">Brand</label><input class="fi" id="EBR" value="'+esc(j.brand||'')+'"></div></div><div class="g2" style="margin-bottom:9px"><div><label class="fl">Model</label><input class="fi" id="EMD" value="'+esc(j.model||'')+'"></div><div><label class="fl">Serial</label><input class="fi" id="ESR" value="'+esc(j.serial||'')+'"></div></div><div class="g2"><div><label class="fl">IMEI</label><input class="fi" id="EIM" value="'+esc(j.imei||'')+'"></div><div><label class="fl">Cosmetic Notes</label><input class="fi" id="ECS" value="'+esc(j.cosm||'')+'"></div></div></div>'
++'<div id="E3" style="display:none"><div style="margin-bottom:9px"><label class="fl">Problem</label><textarea class="fi" id="EPR" rows="3">'+esc(j.prob||'')+'</textarea></div><div style="margin-bottom:9px"><label class="fl">Voice of Customer</label><textarea class="fi" id="EVC" rows="2">'+esc(j.voc||'')+'</textarea></div><div class="g2"><div><label class="fl">Condition</label><input class="fi" id="ECN" value="'+esc(j.cond||'')+'"></div><div><label class="fl">Accessories</label><input class="fi" id="EAC" value="'+esc(j.accs||'')+'"></div></div></div>'
++'<div id="E4" style="display:none"><div class="g2" style="margin-bottom:9px"><div><label class="fl">Status</label><select class="fi" id="EST">'+SL.map(function(s){return '<option'+(j.status===s?' selected':'')+'>'+s+'</option>';}).join('')+'</select></div><div><label class="fl">Engineer</label><select class="fi" id="EEN">'+eOpts+'</select></div></div><div class="g2"><div><label class="fl">Priority</label><select class="fi" id="EPRI"><option'+(j.pri==='Normal'?' selected':'')+'>Normal</option><option'+(j.pri==='Urgent'?' selected':'')+'>Urgent</option><option'+(j.pri==='Express'?' selected':'')+'>Express</option></select></div><div><label class="fl">SLA Hours</label><input class="fi" id="ESL" type="number" value="'+(j.sla||72)+'"></div></div></div>'
++'<div id="E5" style="display:none"><div class="tip" style="margin-bottom:9px">Parts + Labour = Estimate (auto-calculated)</div><div class="g3" style="margin-bottom:9px"><div><label class="fl">Parts &#8377;</label><input class="fi" id="EPA" type="number" value="'+esc(j.parts||'')+'"></div><div><label class="fl">Labour &#8377;</label><input class="fi" id="ELA" type="number" value="'+esc(j.labour||'')+'"></div><div><label class="fl">Estimate &#8377;</label><input class="fi" id="EES" type="number" value="'+esc(j.est||'')+'"></div></div><div class="g2"><div><label class="fl">Notes / Parts List</label><textarea class="fi" id="EEN2" rows="3">'+esc(j.estNote||'')+'</textarea></div><div><label class="fl">Approval</label><select class="fi" id="EEA"><option value="">Pending</option><option value="Approved"'+(j.estAppr==='Approved'?' selected':'')+'>Approved</option><option value="Rejected"'+(j.estAppr==='Rejected'?' selected':'')+'>Rejected</option></select><div style="margin-top:9px"><label class="fl">Final Cost &#8377;</label><input class="fi" id="EFN" type="number" value="'+esc(j.final||'')+'"></div></div></div></div>'
++'<div id="E6" style="display:none"><div class="g2" style="margin-bottom:9px"><div><label class="fl">Total &#8377;</label><input class="fi" id="ETT" type="number" value="'+esc(j.final||j.est||'')+'"></div><div><label class="fl">Amount Paid &#8377;</label><input class="fi" id="EPD" type="number" value="'+esc(j.paid||'')+'"></div></div><div class="g2"><div><label class="fl">Method</label><select class="fi" id="EPM"><option value="">--</option>'+['Cash','UPI / GPay','Card','Bank Transfer','Cheque'].map(function(m){return '<option'+(j.payMeth===m?' selected':'')+'>'+m+'</option>';}).join('')+'</select></div><div><label class="fl">Status</label><select class="fi" id="EPS"><option value="Pending"'+(j.payStatus==='Pending'?' selected':'')+'>Pending</option><option value="Partial"'+(j.payStatus==='Partial'?' selected':'')+'>Partial</option><option value="Paid"'+(j.payStatus==='Paid'?' selected':'')+'>Paid</option></select></div></div></div>'
++'<div id="E7" style="display:none"><div style="max-height:180px;overflow-y:auto;margin-bottom:8px">'+((j.history||[]).map(function(h){return '<div style="display:flex;gap:7px;padding:5px 0;border-bottom:1px solid var(--bdr);font-size:10px"><span style="color:var(--t3);min-width:100px">'+new Date(h.ts).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+'</span>'+spill(h.status)+'<span style="color:var(--acc)">'+(h.by||'')+'</span>'+(h.note?'<span style="color:var(--t3)"> \u2014 '+esc(h.note)+'</span>':'')+'</div>';}).join('')||'<div style="color:var(--t3);font-size:10px;padding:8px">No history</div>')+'</div></div>'
++'<div style="display:flex;justify-content:space-between;margin-top:12px">'+(CU&&CU.role==='Admin'?'<button class="btn br sm" id="eDel">Delete Job</button>':'<div></div>')+'<div style="display:flex;gap:7px"><button class="btn bo sm" id="eRcpt">Print Receipt</button><button class="btn bo sm" id="eCan">Cancel</button><button class="btn bg sm" id="eSv">Save Changes</button></div></div>');
+document.getElementById('ETABS').querySelectorAll('.tab').forEach(function(tab){tab.addEventListener('click',function(){document.getElementById('ETABS').querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});['E1','E2','E3','E4','E5','E6','E7'].forEach(function(i){var el=document.getElementById(i);if(el)el.style.display='none';});tab.classList.add('on');var el=document.getElementById(tab.getAttribute('data-et'));if(el)el.style.display='block';});});
+var epa=document.getElementById('EPA'),ela=document.getElementById('ELA');function autoEst(){var p=parseFloat(epa?epa.value:0)||0,l=parseFloat(ela?ela.value:0)||0;if(p+l>0){var es=document.getElementById('EES');if(es)es.value=String(p+l);}}
+if(epa)epa.addEventListener('input',autoEst);if(ela)ela.addEventListener('input',autoEst);
+eBtn('eCan',cMod);eBtn('eRcpt',function(){cMod();oMod('Receipt',rcptHTML(j));});
+if(document.getElementById('eDel'))eBtn('eDel',function(){trash(id);});
+eBtn('eSv',function(){sEdit(id,j);});}
+
+async function sEdit(id,j){var now=new Date().toISOString(),changes=[];function chk(f,ov,nv,l){if(String(ov||'').trim()!==String(nv||'').trim())changes.push({f:f,l:l,from:ov,to:nv});}function g(eid){var e=document.getElementById(eid);return e?e.value:'';}chk('name',j.name,g('EN'),'Name');chk('vjn',j.vjn,g('EVJ'),'Vendor Job#');chk('b2bref',j.b2bref,g('EB2'),'B2B Ref');chk('brand',j.brand,g('EBR'),'Brand');chk('model',j.model,g('EMD'),'Model');chk('serial',j.serial,g('ESR'),'Serial');chk('prob',j.prob,g('EPR'),'Problem');chk('status',j.status,g('EST'),'Status');chk('eng',j.eng,g('EEN'),'Engineer');chk('est',j.est,g('EES'),'Estimate');chk('final',j.final,g('EFN'),'Final');chk('paid',String(j.paid||''),g('EPD'),'Paid');chk('payStatus',j.payStatus,g('EPS'),'PayStatus');var oldSt=j.status;j.name=g('EN');if(j.ctype==='D2C')j.phone=g('EP');else j.b2bPhone=g('EP');if(j.ctype==='D2C')j.email=g('EE');else j.b2bEmail=g('EE');j.company=g('EC');j.vjn=g('EVJ');j.b2bref=g('EB2');j.dtype=g('EDT');j.brand=g('EBR');j.model=g('EMD');j.serial=g('ESR');j.imei=g('EIM');j.cosm=g('ECS');j.prob=g('EPR');j.voc=g('EVC');j.cond=g('ECN');j.accs=g('EAC');j.status=g('EST');j.eng=g('EEN');j.pri=g('EPRI');j.sla=parseInt(g('ESL'))||72;j.parts=g('EPA');j.labour=g('ELA');j.est=g('EES')||(parseFloat(g('EPA')||0)+parseFloat(g('ELA')||0))||'';j.final=g('EFN');j.estNote=g('EEN2');j.estAppr=g('EEA');j.paid=parseFloat(g('EPD'))||0;j.payStatus=g('EPS');j.payMeth=g('EPM');j.editedBy=CU?CU.name:'Staff';j.editedAt=now;if(j.status==='Completed'&&!j.repEnd){j.repEnd=now;var wd=new Date(now);wd.setDate(wd.getDate()+(DB.settings.wd||30));j.warExp=wd.toISOString();}if(oldSt!==j.status){j.history=j.history||[];j.history.push({status:j.status,ts:now,by:CU?CU.name:'Staff',prev:oldSt});}changes.forEach(function(c){var tp=c.f==='status'?'STATUS_CHANGED':['est','final','estAppr'].indexOf(c.f)>=0?'ESTIMATION_ADDED':['paid','payStatus','payMeth'].indexOf(c.f)>=0?'PAYMENT_UPDATED':'JOB_EDITED';logAct(tp,j.jn,c.l+' updated',{from:c.from,to:c.to});});await pushJob(j);toast('Saved \u2014 '+changes.length+' change(s)','ok');cMod();rAll();}
+
+function rcptHTML(job){if(!job)return'Job not found';var s=DB.settings,d=new Date(job.ts),ds=d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}),ts2=d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});var cn=job.ctype==='B2B'?job.name+' ('+job.company+')':job.name,cp=job.ctype==='B2B'?job.b2bPhone:job.phone;return '<div class="rcp" id="RCP"><div style="text-align:center;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:8px"><div style="font-size:16px;font-weight:800">'+(s.bn||'The Next G')+'</div>'+(s.ba?'<div style="font-size:9px;color:#555">'+esc(s.ba)+'</div>':'')+(s.bp||s.be?'<div style="font-size:9px;color:#555">'+(s.bp||'')+(s.be?' | '+s.be:'')+'</div>':'')+(s.gst?'<div style="font-size:9px;color:#555">GST: '+s.gst+'</div>':'')+'</div>'+(job.isRpn?'<div style="background:#fff3cd;border:1px solid #ffc107;padding:4px 8px;border-radius:3px;margin-bottom:6px;font-size:9px;color:#856404"><strong>REOPEN</strong> \u2014 Previous: '+job.prevJ+'</div>':'')+'<div style="text-align:center;font-weight:800;font-size:10px;border:2px solid #111;padding:4px;margin-bottom:8px;letter-spacing:.8px">JOB ACKNOWLEDGMENT RECEIPT</div><table style="width:100%;font-size:9px;border-collapse:collapse;margin-bottom:6px"><tr><td style="width:50%;vertical-align:top"><div><strong>Our Job#:</strong> <span style="font-family:monospace;color:#1a1af5;font-weight:700;font-size:12px">'+job.jn+'</span></div>'+(job.vjn?'<div><strong>Vendor#:</strong> <span style="font-family:monospace;color:#92400e">'+esc(job.vjn)+'</span></div>':'')+(job.b2bref?'<div><strong>B2B Ref:</strong> '+esc(job.b2bref)+'</div>':'')+'<div><strong>Date:</strong> '+ds+' '+ts2+'</div><div><strong>Type:</strong> '+job.ctype+'</div></td><td style="vertical-align:top;padding-left:8px"><div><strong>Customer:</strong> '+esc(cn)+'</div><div><strong>Phone:</strong> '+esc(cp||'')+'</div><div><strong>Engineer:</strong> '+(job.eng||'TBA')+'</div></td></tr></table><div style="border:1px solid #ccc;padding:6px;border-radius:3px;margin-bottom:6px"><div style="font-weight:800;font-size:9px;margin-bottom:3px;text-transform:uppercase">Device</div><div style="font-size:9px"><strong>'+esc(job.brand)+' '+esc(job.model)+'</strong> ('+esc(job.dtype)+')</div>'+(job.serial?'<div style="font-size:9px">S/N: <span style="font-family:monospace">'+esc(job.serial)+'</span></div>':'')+'<div style="font-size:9px">Condition: <strong>'+esc(job.cond||'')+'</strong></div>'+(job.cosm?'<div style="font-size:9px;color:#c47d00">Cosmetic: '+esc(job.cosm)+'</div>':'')+'<div style="font-size:9px">Accessories: '+(job.accs||'None')+'</div></div><div style="border:1px solid #ccc;padding:6px;border-radius:3px;margin-bottom:6px"><div style="font-weight:800;font-size:9px;margin-bottom:3px;text-transform:uppercase">Problem Reported</div><div style="font-size:9px">'+esc(job.prob)+'</div>'+(job.voc?'<div style="font-size:9px;color:#555;font-style:italic">\u201c'+esc(job.voc)+'\u201d</div>':'')+'</div><div style="font-size:9px;margin-bottom:6px">TAT: <strong>'+job.sla+'h</strong> &nbsp;&middot;&nbsp; Warranty: <strong>'+(s.wd||30)+' days</strong> &nbsp;&middot;&nbsp; <span style="color:#c47d00">Estimate after diagnosis</span></div><div style="margin-bottom:6px"><div style="font-weight:800;font-size:9px;margin-bottom:2px;text-transform:uppercase">Terms &amp; Conditions</div><div style="font-size:8px;color:#555;line-height:1.4">'+(s.terms||'').replace(/\n/g,'<br>')+'</div></div><div style="display:flex;justify-content:space-between;border-top:1px solid #111;padding-top:6px;font-size:9px"><div>Customer: _______</div><div>Staff: _______</div></div></div><div style="display:flex;gap:7px;justify-content:center;margin-top:11px"><button class="btn bp sm" id="rPrint">&#128424; Print</button><button class="btn bo sm" id="rClose">Close</button></div>';}
+
+function oCPin(sid){var s=DB.staff.find(function(x){return x.id===sid;});if(!s)return;var adminReset=CU&&CU.role==='Admin'&&sid!==CU.id;CPID=sid;CPSTEP=adminReset?'new':'current';CPFIRST='';CPENTRY='';oMod('Change PIN \u2014 '+s.name,'<div style="text-align:center;font-size:12px;color:var(--t2);margin-bottom:6px">'+(adminReset?'Set PIN for <strong>'+esc(s.name)+'</strong>':'Changing your own PIN')+'</div><div id="CPLBL" style="text-align:center;font-size:11px;color:var(--t2);margin-bottom:8px">'+(adminReset?'Enter new 4-digit PIN':'Enter current PIN')+'</div><div class="pindots"><div class="pdot" id="cpd0"></div><div class="pdot" id="cpd1"></div><div class="pdot" id="cpd2"></div><div class="pdot" id="cpd3"></div></div><div class="ppad" id="CPPAD"><button class="pk" data-cpn="1">1</button><button class="pk" data-cpn="2">2</button><button class="pk" data-cpn="3">3</button><button class="pk" data-cpn="4">4</button><button class="pk" data-cpn="5">5</button><button class="pk" data-cpn="6">6</button><button class="pk" data-cpn="7">7</button><button class="pk" data-cpn="8">8</button><button class="pk" data-cpn="9">9</button><button class="pk" data-cpn="del" style="font-size:11px">DEL</button><button class="pk" data-cpn="0">0</button><button class="pk" data-cpn="clr" style="font-size:11px">CLR</button></div><div class="perr" id="CPERR"></div><div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn bo sm" id="cpCan">Cancel</button></div>');document.getElementById('CPPAD').querySelectorAll('.pk').forEach(function(btn){btn.addEventListener('click',function(){cpKey(btn.getAttribute('data-cpn'));});});eBtn('cpCan',cMod);}
+function cpKey(n){if(n==='del'){CPENTRY=CPENTRY.slice(0,-1);cpDots();return;}if(n==='clr'){CPENTRY='';cpDots();return;}if(CPENTRY.length>=4)return;CPENTRY+=String(n);cpDots();if(CPENTRY.length===4)setTimeout(cpProcess,150);}
+function cpDots(){for(var i=0;i<4;i++){var el=document.getElementById('cpd'+i);if(el)el.classList.toggle('on',i<CPENTRY.length);}}
+function cpProcess(){var err=document.getElementById('CPERR'),lbl=document.getElementById('CPLBL');var s=DB.staff.find(function(x){return x.id===CPID;});if(!s){cMod();return;}if(CPSTEP==='current'){if(CPENTRY!==String(s.pin)){err.textContent='Wrong current PIN';CPENTRY='';cpDots();return;}CPSTEP='new';CPENTRY='';if(lbl)lbl.textContent='Enter new 4-digit PIN';if(err)err.textContent='';cpDots();}else if(CPSTEP==='new'){CPFIRST=CPENTRY;CPSTEP='confirm';CPENTRY='';if(lbl)lbl.textContent='Confirm new PIN';if(err)err.textContent='';cpDots();}else if(CPSTEP==='confirm'){if(CPENTRY!==CPFIRST){err.textContent='PINs do not match \u2014 try again';CPSTEP='new';CPFIRST='';CPENTRY='';if(lbl)lbl.textContent='Enter new PIN';cpDots();return;}s.pin=CPENTRY;var i=DB.staff.findIndex(function(x){return x.id===CPID;});if(i>=0)DB.staff[i]=s;pushStaff(s);logAct('PIN_CHANGED',null,s.name+' PIN changed',null);cMod();buildLock();toast(s.name+' PIN updated!','ok');}}
+
+function rStaff(){var el=document.getElementById('STLIST');if(!el)return;el.innerHTML=DB.staff.length?DB.staff.map(function(s){return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;margin-bottom:5px"><div><span style="font-weight:600">'+esc(s.name)+'</span> <span style="font-size:10px;color:var(--t3)">'+s.role+'</span> <span style="font-size:10px;color:var(--t3)">'+s.spec+'</span> <span style="font-size:10px;color:var(--grn)">\u2022 PIN set</span></div><div style="display:flex;gap:5px"><button class="btn bo sm" data-cpid="'+s.id+'">Change PIN</button>'+(s.id!=='admin0'?'<button class="btn br sm" data-rmid="'+s.id+'">Remove</button>':'')+'</div></div>';}).join(''):'<p style="font-size:10px;color:var(--t3)">No staff added yet</p>';el.querySelectorAll('[data-cpid]').forEach(function(b){b.addEventListener('click',function(){oCPin(b.getAttribute('data-cpid'));});});el.querySelectorAll('[data-rmid]').forEach(function(b){b.addEventListener('click',function(){rmStaff(b.getAttribute('data-rmid'));});});}
+async function addStaff(){var nm=gv('STNM').trim(),rl=gv('STRL'),sp=gv('STSP');if(!nm){toast('Enter name','er');return;}if(DB.staff.find(function(s){return s.name.toLowerCase()===nm.toLowerCase();})){toast('Name already exists','er');return;}var s={id:Date.now().toString(),name:nm,role:rl,spec:sp,pin:''};DB.staff.push(s);sv('STNM','');await pushStaff(s);buildLock();rStaff();toast(nm+' added. Click Change PIN to set their PIN.','ok');}
+async function rmStaff(id){if(DB.staff.filter(function(s){return s.role==='Admin';}).length<=1&&DB.staff.find(function(s){return s.id===id&&s.role==='Admin';})){toast('Cannot remove last Admin','er');return;}DB.staff=DB.staff.filter(function(x){return x.id!==id;});if(SBURL)await sbDel('staff',id);save();buildLock();rStaff();}
+
+function lCfg(){var s=DB.settings;sv('CBN',s.bn||'The Next G');sv('CBP',s.bp||'');sv('CBE',s.be||'');sv('CBA',s.ba||'');sv('CGST',s.gst||'');sv('CWD',s.wd||30);sv('CGR',s.gstRate||18);sv('CIP',s.invPfx||'INV');sv('CTERMS',s.terms||'');sv('CSBU',SBURL||'');sv('CSBK',SBKEY||'');sv('CEJK',s.ejKey||'');sv('CEJS',s.ejSvc||'');sv('CEJT1',s.ejTpl1||'');sv('CEJT2',s.ejTpl2||'');rStaff();}
+function saveSet(){var s=DB.settings;s.bn=gv('CBN');s.bp=gv('CBP');s.be=gv('CBE');s.ba=gv('CBA');s.gst=gv('CGST');s.wd=parseInt(gv('CWD'))||30;s.gstRate=parseInt(gv('CGR'))||18;s.invPfx=gv('CIP')||'INV';s.terms=gv('CTERMS');s.ejKey=gv('CEJK');s.ejSvc=gv('CEJS');s.ejTpl1=gv('CEJT1');s.ejTpl2=gv('CEJT2');save();toast('Settings saved','ok');}
+function sstab(id){['biz','staff','db','email','data'].forEach(function(t){var el=document.getElementById('SS-'+t);if(el)el.style.display='none';});var el=document.getElementById('SS-'+id);if(el)el.style.display='block';}
+async function testDB(){var res=document.getElementById('DBR');if(res){res.textContent='Testing...';res.style.color='var(--amb)';}var u=gv('CSBU').trim(),k=gv('CSBK').trim();if(!u){toast('Enter Supabase URL','er');return;}var tu=u.replace(/\/$/,'');var r=await(async function(){try{var resp=await fetch(tu+'/rest/v1/staff?limit=1',{headers:{'apikey':k,'Authorization':'Bearer '+k}});return await resp.text()?true:null;}catch(e){return null;}})();if(r){if(res){res.textContent='Connected!';res.style.color='var(--grn)';}SBURL=tu;SBKEY=k;toast('Connected!','ok');}else{if(res){res.textContent='Failed \u2014 check URL/Key';res.style.color='var(--red)';}}}
+async function saveDB(){var u=gv('CSBU').trim(),k=gv('CSBK').trim();if(!u||!k){toast('Enter both URL and Key','er');return;}SBURL=u.replace(/\/$/,'');SBKEY=k;DB.settings.sbUrl=SBURL;DB.settings.sbKey=SBKEY;save();await testDB();if(SBURL)syncAll();}
+function showSQL(){oMod('Supabase Setup SQL','<div class="tip" style="margin-bottom:9px">Go to Supabase \u2192 SQL Editor \u2192 New query \u2192 paste \u2192 Run</div><pre style="background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:10px;font-size:9px;color:var(--cyn);overflow-x:auto;line-height:1.6;white-space:pre-wrap;max-height:300px;overflow-y:auto" id="SQLB">CREATE TABLE IF NOT EXISTS jobs (id text PRIMARY KEY, data jsonb, branch text DEFAULT \'main\', created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now());\nCREATE TABLE IF NOT EXISTS activity_log (id text PRIMARY KEY, data jsonb, branch text DEFAULT \'main\', created_at timestamptz DEFAULT now());\nCREATE TABLE IF NOT EXISTS staff (id text PRIMARY KEY, data jsonb);\nCREATE TABLE IF NOT EXISTS vendors (id text PRIMARY KEY, data jsonb);\nCREATE TABLE IF NOT EXISTS parts (id text PRIMARY KEY, data jsonb);\nCREATE TABLE IF NOT EXISTS invoices (id text PRIMARY KEY, data jsonb, branch text DEFAULT \'main\', created_at timestamptz DEFAULT now());\nCREATE TABLE IF NOT EXISTS comms (id text PRIMARY KEY, data jsonb, branch text DEFAULT \'main\', created_at timestamptz DEFAULT now());\nALTER TABLE jobs ENABLE ROW LEVEL SECURITY;\nALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;\nALTER TABLE staff ENABLE ROW LEVEL SECURITY;\nALTER TABLE vendors ENABLE ROW LEVEL SECURITY;\nALTER TABLE parts ENABLE ROW LEVEL SECURITY;\nALTER TABLE invoices ENABLE ROW LEVEL SECURITY;\nALTER TABLE comms ENABLE ROW LEVEL SECURITY;\nCREATE POLICY "Allow all" ON jobs FOR ALL USING (true) WITH CHECK (true);\nCREATE POLICY "Allow all" ON activity_log FOR ALL USING (true) WITH CHECK (true);\nCREATE POLICY "Allow all" ON staff FOR ALL USING (true) WITH CHECK (true);\nCREATE POLICY "Allow all" ON vendors FOR ALL USING (true) WITH CHECK (true);\nCREATE POLICY "Allow all" ON parts FOR ALL USING (true) WITH CHECK (true);\nCREATE POLICY "Allow all" ON invoices FOR ALL USING (true) WITH CHECK (true);\nCREATE POLICY "Allow all" ON comms FOR ALL USING (true) WITH CHECK (true);\nINSERT INTO staff (id, data) VALUES (\'admin0\', \'{"id":"admin0","name":"Admin","role":"Admin","spec":"All Devices","pin":"8543"}\') ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data;</pre><div style="display:flex;gap:7px;justify-content:flex-end;margin-top:10px"><button class="btn bo sm" id="sqlCopy">Copy SQL</button><button class="btn bo sm" id="sqlClose">Close</button></div>');eBtn('sqlClose',cMod);eBtn('sqlCopy',function(){var el=document.getElementById('SQLB');if(navigator.clipboard)navigator.clipboard.writeText(el.textContent).then(function(){toast('SQL copied!','ok');});});}
+
+function bkp(){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(DB,null,2)],{type:'application/json'}));a.download='nextg_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('Backup downloaded','ok');}
+function rst(){var inp=document.createElement('input');inp.type='file';inp.accept='.json';inp.onchange=function(e){var fr=new FileReader();fr.onload=function(ev){try{var p=JSON.parse(ev.target.result);if(p.jobs)DB.jobs=p.jobs;if(p.deletedJobs)DB.deletedJobs=p.deletedJobs;if(p.vendors)DB.vendors=p.vendors;if(p.parts)DB.parts=p.parts;if(p.invoices)DB.invoices=p.invoices;if(p.comms)DB.comms=p.comms;if(p.activityLog)DB.activityLog=p.activityLog;if(p.settings)DB.settings=Object.assign({},DB.settings,p.settings);if(p.staff&&p.staff.length){var extra=p.staff.filter(function(s){return s.id!=='admin0';});DB.staff=[DB.staff[0]].concat(extra);}save();rAll();buildLock();toast('Data restored!','ok');}catch(err){toast('Invalid file','er');}};fr.readAsText(e.target.files[0]);};inp.click();}
+function xCSV(){var H=['Our Job#','Vendor Job#','B2B Ref','Type','Customer','Company','Phone','Email','Device','Brand','Model','Serial','Status','Engineer','Priority','Estimate','Final','Pay Status','Paid','Date'];var rows=DB.jobs.map(function(j){return[j.jn,j.vjn||'',j.b2bref||'',j.ctype,j.name,j.company||'',j.phone||j.b2bPhone||'',j.email||j.b2bEmail||'',j.dtype,j.brand,j.model,j.serial||'',j.status,j.eng||'',j.pri,j.est||'',j.final||'',j.payStatus||'Pending',j.paid||0,new Date(j.ts).toLocaleDateString('en-IN')];});var csv=[H].concat(rows).map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='nextg_jobs_'+new Date().toISOString().slice(0,10)+'.csv';a.click();toast('CSV exported','ok');}
+
+function scanJob(){oMod('Find Job by Number','<div class="tip" style="margin-bottom:9px">Type any job number \u2014 our format or vendor format.</div><div><label class="fl">Job Number</label><input class="fi" id="SCAN" placeholder="D2C-MB-..." autofocus></div><div id="SCANR" style="margin-top:10px"></div>');setTimeout(function(){var el=document.getElementById('SCAN');if(el){el.focus();el.addEventListener('input',function(){var q=this.value.trim().toLowerCase(),r=document.getElementById('SCANR');if(!q){r.innerHTML='';return;}var j=DB.jobs.find(function(x){return x.jn.toLowerCase().indexOf(q)>=0||(x.vjn||'').toLowerCase().indexOf(q)>=0;});if(j){r.innerHTML='<div class="card" style="margin-top:8px"><div class="mono" style="font-size:14px;font-weight:800">'+j.jn+'</div><div style="font-size:11px;margin-top:5px">'+esc(j.name)+(j.company?' \u2014 '+esc(j.company):'')+' \u00b7 '+esc(j.brand)+' '+esc(j.model)+'</div><div style="margin-top:5px">'+spill(j.status)+'</div><div style="display:flex;gap:7px;margin-top:9px"><button class="btn bp sm" id="scEdit">Edit</button><button class="btn bo sm" id="scClose">Close</button></div></div>';eBtn('scEdit',function(){oEdit(j.id);});eBtn('scClose',cMod);}else{r.innerHTML=q.length>=2?'<div class="empty" style="padding:10px">No job found</div>':'';}});}},200);}
+
+function rAll(){rDash();rJobs();rEng();rEst();rPay();rInv();rParts();rWarr();rComms();rVendors();rAct();rBin();rStaff();updBadge();lCfg();}
+
+// ══ MAIN INIT — All event listeners here, ZERO onclick in HTML ══
+document.addEventListener('DOMContentLoaded',function(){
+  load();
+  var s=DB.settings;
+  if(s.sbUrl&&s.sbKey){SBURL=s.sbUrl.replace(/\/$/,'');SBKEY=s.sbKey;}
+
+  // LOCK SCREEN KEYPAD — uses data-n attribute
+  document.getElementById('NPAD').querySelectorAll('.nk').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var n=btn.getAttribute('data-n');
+      if(n==='clr'){LPIN='';updDots();}
+      else if(n==='del'){LPIN=LPIN.slice(0,-1);updDots();}
+      else{lkp(parseInt(n));}
+    });
+  });
+
+  eBtn('btnLock',lockApp);
+  eBtn('btnSync',syncAll);
+  eBtn('btnScan',scanJob);
+  eBtn('btnNew',function(){nav('newjob');});
+  eBtn('dashNew',function(){nav('newjob');});
+  eBtn('btnMX',cMod);
+
+  document.getElementById('SB').querySelectorAll('.ni[data-pg]').forEach(function(btn){btn.addEventListener('click',function(){nav(btn.getAttribute('data-pg'));});});
+
+  on(document.getElementById('JQ'),'input',rJobs);
+  on(document.getElementById('JST'),'change',rJobs);
+  on(document.getElementById('JTP'),'change',rJobs);
+  eBtn('btnCSV',xCSV);
+  on(document.getElementById('SBQ'),'input',doSearch);
+  on(document.getElementById('SBY'),'change',doSearch);
+  on(document.getElementById('EFE'),'change',rEng);
+  on(document.getElementById('EFS'),'change',rEng);
+  on(document.getElementById('AFU'),'change',rAct);
+  on(document.getElementById('AFT'),'change',rAct);
+  on(document.getElementById('VLQ'),'input',rVendors);
+  eBtn('btnAddVen',function(){oVF('');});
+  on(document.getElementById('PQ'),'input',rParts);
+  eBtn('btnAddPart',addPart);
+  eBtn('btnAddComm',addComm);
+  eBtn('btnGenInv',genInv);
+  eBtn('btnEmptyBin',emptyBin);
+
+  document.getElementById('STABS').querySelectorAll('.tab[data-st]').forEach(function(tab){tab.addEventListener('click',function(){document.getElementById('STABS').querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});tab.classList.add('on');sstab(tab.getAttribute('data-st'));});});
+  eBtn('btnSaveSet',saveSet);
+  eBtn('btnAddStaff',addStaff);
+  eBtn('btnTestDB',testDB);
+  eBtn('btnSaveDB',saveDB);
+  eBtn('btnSQL',showSQL);
+  eBtn('btnBkp',bkp);
+  eBtn('btnRst',rst);
+  eBtn('btnXCSV',xCSV);
+  eBtn('btnForceSync',syncAll);
+
+  document.getElementById('MOD').addEventListener('click',function(e){if(e.target===this)cMod();});
+  document.getElementById('MBOD').addEventListener('click',function(e){if(e.target.id==='rPrint')window.print();if(e.target.id==='rClose')cMod();});
+
+  // BOOT: show loading overlay, fetch ALL staff+data from cloud before showing lock screen
+  buildLock();
+  var lstat=document.getElementById('LSTAT');
+  if(SBURL){
+    // Disable keypad while loading
+    var npad=document.getElementById('NPAD');
+    if(npad){npad.style.pointerEvents='none';npad.style.opacity='0.35';}
+    if(lstat){lstat.style.color='var(--amb)';lstat.textContent='\u23F3 Connecting to cloud…';}
+    loadStaff().then(function(){
+      return sbGet('jobs','?order=created_at.desc&limit=2000');
+    }).then(function(rs){
+      if(rs&&rs.length)DB.jobs=rs.map(function(r){return r.data;});
+      return sbGet('vendors');
+    }).then(function(rs){
+      if(rs&&rs.length)DB.vendors=rs.map(function(r){return r.data;});
+      return sbGet('parts');
+    }).then(function(rs){
+      if(rs&&rs.length)DB.parts=rs.map(function(r){return r.data;});
+      save();
+      buildLock();
+      if(lstat){lstat.style.color='var(--grn)';lstat.textContent='\u2705 Cloud connected — select your name';}
+      if(npad){npad.style.pointerEvents='';npad.style.opacity='1';}
+    }).catch(function(){
+      if(lstat){lstat.style.color='var(--red)';lstat.textContent='\u26A0 Cloud error — using local data';}
+      if(npad){npad.style.pointerEvents='';npad.style.opacity='1';}
+      buildLock();
+    });
+  } else {
+    if(lstat){lstat.style.color='var(--t3)';lstat.textContent='Local mode — set Supabase in Settings';}
+  }
+});
+
+</script>
+</body>
+</html>
